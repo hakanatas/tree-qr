@@ -1,0 +1,50 @@
+<!doctype html><meta charset="utf-8"><title>QR encoder test</title>
+<body style="font:13px/1.5 monospace;padding:12px"><pre id="out">running…</pre>
+<script type="module">
+import { encodeQR } from './qr.js';
+
+const out = document.getElementById('out');
+if (!('BarcodeDetector' in window)) { out.textContent = 'BarcodeDetector unavailable in this browser'; throw new Error('no detector'); }
+const detector = new BarcodeDetector({ formats: ['qr_code'] });
+
+const render = (r, scale = 8, quiet = 4) => {
+  const px = (r.size + quiet * 2) * scale;
+  const cv = new OffscreenCanvas(px, px);
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, px, px);
+  ctx.fillStyle = '#000';
+  for (let i = 0; i < r.size; i++) for (let j = 0; j < r.size; j++) {
+    if (r.modules[i][j]) ctx.fillRect((j + quiet) * scale, (i + quiet) * scale, scale, scale);
+  }
+  return cv;
+};
+
+const payloads = [
+  'https://icqr.com/', 'https://tree.icqr.com/', 'HELLO', 'x',
+  'https://example.com/a-somewhat-longer-url-for-testing-version-bumps?x=1&y=2',
+  'https://www.google.com/search?q=three.js+procedural+tree+isometric+scene+demo',
+  'Ağaç QR — üşengeç şoför çğıöş',
+  'https://tree.example.com/?data=' + 'a'.repeat(150),
+  'b'.repeat(300),
+];
+const lines = [];
+let pass = 0, fail = 0;
+for (const text of payloads) {
+  for (const ecc of ['l', 'm', 'q', 'h']) {
+    for (const mask of [null, 0, 1, 2, 3, 4, 5, 6, 7]) {
+      let r;
+      try { r = encodeQR(text, ecc, mask); }
+      catch (e) { lines.push(`SKIP ecc=${ecc} len=${text.length}: ${e.message}`); continue; }
+      const found = await detector.detect(render(r));
+      const decoded = found[0]?.rawValue;
+      if (decoded === text) pass++;
+      else {
+        fail++;
+        lines.push(`FAIL ecc=${ecc} mask=${mask ?? 'auto→' + r.mask} v${r.version} "${text.slice(0, 24)}" → ${decoded === undefined ? 'not detected' : JSON.stringify(decoded.slice(0, 30))}`);
+      }
+    }
+  }
+}
+lines.unshift(`decoded ${pass} / ${pass + fail} symbols with the browser's own QR reader`);
+out.textContent = lines.join('\n');
+</script>

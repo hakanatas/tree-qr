@@ -1,0 +1,1568 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Magic Tree — 3D QR Code Generator</title>
+<meta name="description" content="Turn any link into a 3D tree whose leaves fly into a scannable QR code. Pick a season, share your tree." />
+<meta name="theme-color" content="#f6f1e7" />
+<style>
+  :root {
+    --bg: #f6f1e7;
+    --panel: #fffdf7;
+    --ink: #2b2622;
+    --ink-soft: #7d746a;
+    --line: #e4dccd;
+    --accent: #f5d949;
+    --accent-ink: #3a3218;
+    --brown: #a9713f;
+    --radius: 18px;
+    --frame-w: 430px;
+    --tap: 44px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    background: #efe8db;
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+  body { display: grid; place-items: center; }
+
+  /* On a phone the app is full-bleed; on a desktop it sits in a centred frame. */
+  #app {
+    position: relative;
+    width: min(100vw, var(--frame-w));
+    height: min(100dvh, 920px);
+    background: var(--bg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: background 600ms ease;
+  }
+  @media (min-width: 480px) and (min-height: 700px) {
+    #app { border-radius: 28px; box-shadow: 0 24px 70px rgba(60, 48, 30, .22); }
+  }
+
+  canvas#scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  /* ---------- header ---------- */
+  header {
+    position: relative;
+    z-index: 2;
+    padding: 22px 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+  }
+  .logo-wrap { position: relative; padding: 12px 22px; }
+  .logo-wrap svg { display: block; height: 58px; width: auto; }
+  .logo-wrap svg circle { fill: var(--ink); }
+  .bracket {
+    position: absolute; width: 22px; height: 22px;
+    border: 3px solid var(--accent); border-radius: 3px;
+  }
+  .bracket.tl { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+  .bracket.tr { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+  .bracket.bl { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+  .bracket.br { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+
+  #peek {
+    pointer-events: auto;
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--accent); color: var(--accent-ink);
+    border-radius: 999px; padding: 7px 14px;
+    font-size: 14px; font-weight: 600;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, .06);
+    transition: transform 140ms ease, filter 140ms ease;
+  }
+  #peek:active { transform: scale(.96); filter: brightness(.96); }
+  #peek svg { width: 16px; height: 16px; }
+
+  #info {
+    pointer-events: auto;
+    position: absolute; top: 22px; right: 18px;
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1.5px solid var(--ink-soft); color: var(--ink-soft);
+    display: grid; place-items: center;
+    font-size: 15px; font-weight: 700; font-style: italic; font-family: Georgia, serif;
+    z-index: 3;
+  }
+  #info:active { background: rgba(0, 0, 0, .05); }
+
+  /* ---------- bottom controls ---------- */
+  .controls {
+    position: relative; z-index: 2;
+    margin-top: auto;
+    padding: 0 16px calc(16px + env(safe-area-inset-bottom));
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  #hint {
+    align-self: center;
+    background: rgba(255, 253, 247, .72);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    border-radius: 999px;
+    padding: 12px 22px;
+    font-size: 15px;
+    margin-bottom: 14px;
+    backdrop-filter: blur(6px);
+    transition: opacity 240ms ease;
+  }
+  .row { display: flex; gap: 10px; }
+  #url {
+    flex: 1; min-width: 0;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 18px;
+    font-size: 17px; color: var(--ink);
+    outline: none;
+    transition: border-color 160ms ease;
+  }
+  #url:focus { border-color: var(--brown); }
+  #url::placeholder { color: #b8ada0; }
+  #share, #download {
+    width: 58px; flex: none; border-radius: var(--radius);
+    display: grid; place-items: center;
+    transition: transform 140ms ease, filter 140ms ease;
+  }
+  #share { background: var(--brown); color: #fff; }
+  #download { background: var(--panel); border: 1px solid var(--line); color: var(--ink-soft); }
+  #share:active, #download:active { transform: scale(.96); filter: brightness(.94); }
+  #share svg, #download svg { width: 22px; height: 22px; }
+  #download[disabled] { opacity: .5; }
+
+  .seasons { display: flex; gap: 8px; }
+  .seasons button {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 15px 6px;
+    font-size: 15px; color: var(--ink-soft);
+    min-height: var(--tap);
+    transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+  }
+  .seasons button svg { width: 20px; height: 20px; flex: none; }
+  .seasons button[aria-pressed="true"] {
+    background: #eee7d8; color: var(--ink); font-weight: 600; border-color: #ded4c2;
+  }
+  #mute { flex: 0 0 62px; }
+
+  /* ---------- overlays ---------- */
+  #toast {
+    position: absolute; left: 50%; bottom: 210px; transform: translate(-50%, 8px);
+    background: var(--ink); color: #fff;
+    padding: 10px 16px; border-radius: 999px; font-size: 14px;
+    opacity: 0; pointer-events: none; transition: opacity 220ms ease, transform 220ms ease;
+    z-index: 5; max-width: 88%; text-align: center;
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  dialog {
+    border: 0; padding: 0; background: none; color: inherit;
+    max-width: 92%; width: 360px;
+    margin: auto;                 /* the global reset above cancels the centring */
+  }
+  dialog::backdrop { background: rgba(40, 33, 24, .45); backdrop-filter: blur(2px); }
+  .sheet {
+    background: var(--panel);
+    border-radius: 22px;
+    padding: 24px 22px 18px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+  }
+  .sheet h2 { font-size: 19px; margin-bottom: 10px; }
+  .sheet p { font-size: 14.5px; line-height: 1.55; color: var(--ink-soft); margin-bottom: 10px; }
+  .sheet ul { font-size: 14.5px; line-height: 1.55; color: var(--ink-soft); padding-left: 18px; margin-bottom: 12px; }
+  .sheet button {
+    width: 100%; margin-top: 8px; padding: 13px;
+    background: var(--accent); color: var(--accent-ink);
+    border-radius: 14px; font-weight: 600;
+  }
+  .sheet button.ghost {
+    background: none; color: var(--ink-soft);
+    border: 1px solid var(--line);
+  }
+  .sheet button[disabled] { opacity: .45; }
+  #export-status:empty { display: none; }
+  #export-status { margin: 12px 0 2px; text-align: center; font-variant-numeric: tabular-nums; }
+
+  #loading {
+    position: absolute; inset: 0; z-index: 6;
+    display: grid; place-items: center;
+    background: var(--bg); color: var(--ink-soft); font-size: 14px;
+    transition: opacity 400ms ease;
+  }
+  #loading.done { opacity: 0; pointer-events: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 1ms !important; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="scene"></canvas>
+
+  <header>
+    <div class="logo-wrap">
+      <span class="bracket tl"></span><span class="bracket tr"></span>
+      <span class="bracket bl"></span><span class="bracket br"></span>
+      <div id="logo"></div>
+    </div>
+    <button id="peek" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1.5 12S5 5.5 12 5.5 22.5 12 22.5 12 19 18.5 12 18.5 1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/>
+      </svg>
+      <span id="peek-label">I see QR</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:12px">
+        <path d="m9 5 7 7-7 7"/>
+      </svg>
+    </button>
+  </header>
+
+  <button id="info" type="button" aria-label="About this app">i</button>
+
+  <div class="controls">
+    <div id="hint">Tap the tree to see QR code</div>
+    <div class="row">
+      <input id="url" type="url" inputmode="url" autocomplete="off" spellcheck="false"
+             value="https://example.com/" placeholder="Paste a link" aria-label="Link to encode" />
+      <button id="download" type="button" aria-label="Download animation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v13"/><path d="m7 11 5 5 5-5"/><path d="M4 19h16"/>
+        </svg>
+      </button>
+      <button id="share" type="button" aria-label="Share this tree">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 16V3"/><path d="m7 8 5-5 5 5"/><path d="M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/>
+        </svg>
+      </button>
+    </div>
+    <div class="seasons">
+      <button type="button" data-season="spring" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="7.5" r="3.4"/><circle cx="12" cy="16.5" r="3.4"/>
+          <circle cx="7.5" cy="12" r="3.4"/><circle cx="16.5" cy="12" r="3.4"/>
+        </svg><span>Spring</span>
+      </button>
+      <button type="button" data-season="summer" aria-pressed="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>
+        </svg><span>Summer</span>
+      </button>
+      <button type="button" data-season="autumn" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M17.5 15.5a4.5 4.5 0 0 0-1.2-8.8 6 6 0 0 0-11.3 2A3.9 3.9 0 0 0 5.5 15.5"/>
+          <path d="M8 18.5v2M12 18v2.5M16 18.5v2"/>
+        </svg><span>Autumn</span>
+      </button>
+      <button id="mute" type="button" aria-pressed="false" aria-label="Toggle sound">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 5 6.5 9H3v6h3.5L11 19z"/><path id="mute-on" d="m16 9.5 5 5M21 9.5l-5 5"/>
+          <path id="mute-off" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" style="display:none"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="toast" role="status"></div>
+  <div id="loading">growing a tree…</div>
+</div>
+
+<dialog id="about">
+  <div class="sheet">
+    <h2>Magic Tree</h2>
+    <p>Every leaf on this tree is one module of a QR code. Tap the tree and the camera lifts overhead while the canopy settles into a scannable code for your link — tap again and it grows back.</p>
+    <ul>
+      <li>Paste any link in the field below the tree.</li>
+      <li>Point a phone camera at the code to open it.</li>
+      <li>Switch seasons to recolour the canopy.</li>
+    </ul>
+    <p>Built from scratch with three.js and a hand-rolled QR encoder — no tracking, nothing leaves your device.</p>
+    <button type="button" id="about-close">Got it</button>
+  </div>
+</dialog>
+
+<dialog id="export">
+  <div class="sheet">
+    <h2>Download the animation</h2>
+    <p>Just under six seconds: the tree holds, then folds itself into your QR code and stays there long enough to scan.</p>
+    <button type="button" id="export-gif">Animated GIF · 480px</button>
+    <button type="button" id="export-video" class="ghost">Video · 720px</button>
+    <p style="margin-top:12px;font-size:13px">The GIF loops anywhere and takes a few seconds to encode. The video is sharper and smaller, but it records in real time — leave this tab in front while it runs.</p>
+    <p id="export-status" role="status"></p>
+    <button type="button" id="export-close" class="ghost">Close</button>
+  </div>
+</dialog>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.171.0/build/three.module.min.js"
+  }
+}
+</script>
+<!-- To run fully offline, change the import above to "./three.module.min.js"
+     and open the page through a local web server (file:// blocks module imports). -->
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ══════════════════════════════════════════════════════════════════════════
+   QR encoder — byte mode, versions 1-15, ECC L/M/Q/H (ISO/IEC 18004).
+   Same code as qr.js; dev/qr-test.html round-trips it through the browser's
+   own QR reader.
+   ══════════════════════════════════════════════════════════════════════════ */
+const ECB = {
+  l: [[[1,26,19]],[[1,44,34]],[[1,70,55]],[[1,100,80]],[[1,134,108]],[[2,86,68]],[[2,98,78]],[[2,121,97]],[[2,146,116]],[[2,86,68],[2,87,69]],[[4,101,81]],[[2,116,92],[2,117,93]],[[4,133,107]],[[3,145,115],[1,146,116]],[[5,109,87],[1,110,88]]],
+  m: [[[1,26,16]],[[1,44,28]],[[1,70,44]],[[2,50,32]],[[2,67,43]],[[4,43,27]],[[4,49,31]],[[2,60,38],[2,61,39]],[[3,58,36],[2,59,37]],[[4,69,43],[1,70,44]],[[1,80,50],[4,81,51]],[[6,58,36],[2,59,37]],[[8,59,37],[1,60,38]],[[4,64,40],[5,65,41]],[[5,65,41],[5,66,42]]],
+  q: [[[1,26,13]],[[1,44,22]],[[2,35,17]],[[2,50,24]],[[2,33,15],[2,34,16]],[[4,43,19]],[[2,32,14],[4,33,15]],[[4,40,18],[2,41,19]],[[4,36,16],[4,37,17]],[[6,43,19],[2,44,20]],[[4,50,22],[4,51,23]],[[4,46,20],[6,47,21]],[[8,44,20],[4,45,21]],[[11,36,16],[5,37,17]],[[5,54,24],[7,55,25]]],
+  h: [[[1,26,9]],[[1,44,16]],[[2,35,13]],[[4,25,9]],[[2,33,11],[2,34,12]],[[4,43,15]],[[4,39,13],[1,40,14]],[[4,40,14],[2,41,15]],[[4,36,12],[4,37,13]],[[6,43,15],[2,44,16]],[[3,36,12],[8,37,13]],[[7,42,14],[4,43,15]],[[12,33,11],[4,34,12]],[[11,36,12],[5,37,13]],[[11,36,12],[7,37,13]]],
+};
+const ALIGN = [[],[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70]];
+const ECC_BITS = { l: 1, m: 0, q: 3, h: 2 };
+
+const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+(function initGF() {
+  let x = 1;
+  for (let i = 0; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 0x100) x ^= 0x11d; }
+  for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+})();
+const gmul = (a, b) => (a === 0 || b === 0) ? 0 : EXP[LOG[a] + LOG[b]];
+
+function generatorPoly(degree) {
+  let poly = [1];                                  // coefficients, highest degree first
+  for (let d = 0; d < degree; d++) {
+    const next = new Array(poly.length + 1).fill(0);
+    for (let i = 0; i < poly.length; i++) {        // multiply by (x + a^d)
+      next[i] ^= poly[i];
+      next[i + 1] ^= gmul(poly[i], EXP[d]);
+    }
+    poly = next;
+  }
+  return poly;
+}
+function rsEncode(data, ecCount) {
+  const gen = generatorPoly(ecCount);
+  const res = new Uint8Array(ecCount);
+  for (const byte of data) {
+    const factor = byte ^ res[0];
+    res.copyWithin(0, 1);
+    res[ecCount - 1] = 0;
+    if (factor !== 0) for (let i = 0; i < ecCount; i++) res[i] ^= gmul(gen[i + 1], factor);
+  }
+  return res;
+}
+const countBits = (version) => version < 10 ? 8 : 16;
+const capacityBytes = (version, ecc) => ECB[ecc][version - 1].reduce((sum, [n, , d]) => sum + n * d, 0);
+function pickVersion(byteLen, ecc) {
+  for (let v = 1; v <= 15; v++) if (4 + countBits(v) + 8 * byteLen <= capacityBytes(v, ecc) * 8) return v;
+  return null;
+}
+function buildCodewords(bytes, version, ecc) {
+  const totalData = capacityBytes(version, ecc);
+  const bits = [];
+  const push = (value, len) => { for (let i = len - 1; i >= 0; i--) bits.push((value >> i) & 1); };
+  push(0b0100, 4);
+  push(bytes.length, countBits(version));
+  for (const b of bytes) push(b, 8);
+  for (let i = 0; i < 4 && bits.length < totalData * 8; i++) bits.push(0);
+  while (bits.length % 8) bits.push(0);
+  const data = new Uint8Array(totalData);
+  for (let i = 0; i + 8 <= bits.length; i += 8) {
+    let byte = 0;
+    for (let j = 0; j < 8; j++) byte = (byte << 1) | bits[i + j];
+    data[i / 8] = byte;
+  }
+  for (let i = bits.length / 8, pad = 0; i < totalData; i++, pad++) data[i] = pad % 2 ? 0x11 : 0xec;
+
+  const dataBlocks = [], ecBlocks = [];
+  let offset = 0;
+  for (const [count, total, dataLen] of ECB[ecc][version - 1]) {
+    for (let b = 0; b < count; b++) {
+      const block = data.subarray(offset, offset + dataLen);
+      offset += dataLen;
+      dataBlocks.push(block);
+      ecBlocks.push(rsEncode(block, total - dataLen));
+    }
+  }
+  const out = [];
+  const maxData = Math.max(...dataBlocks.map(b => b.length));
+  for (let i = 0; i < maxData; i++) for (const b of dataBlocks) if (i < b.length) out.push(b[i]);
+  const maxEc = Math.max(...ecBlocks.map(b => b.length));
+  for (let i = 0; i < maxEc; i++) for (const b of ecBlocks) if (i < b.length) out.push(b[i]);
+  return out;
+}
+function bchFormat(value) {
+  let rest = value << 10;
+  for (let i = 14; i >= 10; i--) if ((rest >> i) & 1) rest ^= 0x537 << (i - 10);
+  return ((value << 10) | rest) ^ 0x5412;
+}
+function bchVersion(version) {
+  let rest = version << 12;
+  for (let i = 17; i >= 12; i--) if ((rest >> i) & 1) rest ^= 0x1f25 << (i - 12);
+  return (version << 12) | rest;
+}
+const MASKS = [
+  (i, j) => (i + j) % 2 === 0,
+  (i, j) => i % 2 === 0,
+  (i, j) => j % 3 === 0,
+  (i, j) => (i + j) % 3 === 0,
+  (i, j) => ((i >> 1) + Math.floor(j / 3)) % 2 === 0,
+  (i, j) => ((i * j) % 2) + ((i * j) % 3) === 0,
+  (i, j) => (((i * j) % 2) + ((i * j) % 3)) % 2 === 0,
+  (i, j) => (((i + j) % 2) + ((i * j) % 3)) % 2 === 0,
+];
+const emptyGrid = (size, fill) => Array.from({ length: size }, () => new Int8Array(size).fill(fill));
+
+function drawFunctionPatterns(size, version) {
+  const m = emptyGrid(size, -1);
+  const reserved = emptyGrid(size, 0);
+  const set = (r, c, v) => { m[r][c] = v; reserved[r][c] = 1; };
+  const finder = (r0, c0) => {
+    for (let r = -1; r <= 7; r++) for (let c = -1; c <= 7; c++) {
+      const rr = r0 + r, cc = c0 + c;
+      if (rr < 0 || cc < 0 || rr >= size || cc >= size) continue;
+      const inRing = r >= 0 && r <= 6 && c >= 0 && c <= 6;
+      const dark = inRing && ((r === 0 || r === 6 || c === 0 || c === 6) || (r >= 2 && r <= 4 && c >= 2 && c <= 4));
+      set(rr, cc, dark ? 1 : 0);
+    }
+  };
+  finder(0, 0); finder(0, size - 7); finder(size - 7, 0);
+  for (let i = 8; i < size - 8; i++) { const v = i % 2 === 0 ? 1 : 0; set(6, i, v); set(i, 6, v); }
+  for (const r of ALIGN[version]) for (const c of ALIGN[version]) {
+    if ((r <= 8 && c <= 8) || (r <= 8 && c >= size - 9) || (r >= size - 9 && c <= 8)) continue;
+    for (let dr = -2; dr <= 2; dr++) for (let dc = -2; dc <= 2; dc++) {
+      set(r + dr, c + dc, Math.max(Math.abs(dr), Math.abs(dc)) !== 1 ? 1 : 0);
+    }
+  }
+  set(size - 8, 8, 1);
+  for (let i = 0; i < 9; i++) {
+    if (!reserved[8][i]) set(8, i, 0);
+    if (!reserved[i][8]) set(i, 8, 0);
+  }
+  for (let i = 0; i < 8; i++) {
+    if (!reserved[8][size - 1 - i]) set(8, size - 1 - i, 0);
+    if (!reserved[size - 1 - i][8]) set(size - 1 - i, 8, 0);
+  }
+  if (version >= 7) {
+    for (let i = 0; i < 18; i++) {
+      const r = Math.floor(i / 3), c = size - 11 + (i % 3);
+      set(r, c, 0); set(c, r, 0);
+    }
+  }
+  return { m, reserved };
+}
+function placeData(m, reserved, codewords, size) {
+  let bit = 0;
+  const nextBit = () => {
+    const idx = bit >> 3;
+    const v = idx < codewords.length ? (codewords[idx] >> (7 - (bit & 7))) & 1 : 0;
+    bit++;
+    return v;
+  };
+  let upward = true;
+  for (let right = size - 1; right >= 1; right -= 2) {
+    if (right === 6) right = 5;
+    for (let step = 0; step < size; step++) {
+      const row = upward ? size - 1 - step : step;
+      for (const col of [right, right - 1]) if (!reserved[row][col]) m[row][col] = nextBit();
+    }
+    upward = !upward;
+  }
+}
+function penalty(m, size) {
+  let score = 0;
+  const runScore = (line) => {
+    let s = 0, run = 1;
+    for (let i = 1; i <= line.length; i++) {
+      if (i < line.length && line[i] === line[i - 1]) run++;
+      else { if (run >= 5) s += 3 + (run - 5); run = 1; }
+    }
+    return s;
+  };
+  const PATTERN = [1, 0, 1, 1, 1, 0, 1];
+  const finderLike = (line) => {
+    const at = (i) => PATTERN.every((p, k) => line[i + k] === p);
+    const find = (from) => { for (let i = from; i + 7 <= size; i++) if (at(i)) return i; return -1; };
+    const allLight = (a, b) => {
+      for (let i = Math.max(a, 0); i < Math.min(b, size); i++) if (line[i]) return false;
+      return true;
+    };
+    let s = 0, idx = find(0);
+    while (idx !== -1) {
+      let next = idx + 7;
+      if (idx === 0 || idx === size - 7 || allLight(idx - 4, idx) || allLight(next, next + 4)) s += 40;
+      else next = idx + 4;
+      idx = find(next);
+    }
+    return s;
+  };
+  const lines = [];
+  for (let r = 0; r < size; r++) lines.push(Array.from(m[r]));
+  for (let c = 0; c < size; c++) lines.push(Array.from({ length: size }, (_, r) => m[r][c]));
+  for (const line of lines) score += runScore(line) + finderLike(line);
+  for (let r = 0; r < size - 1; r++) for (let c = 0; c < size - 1; c++) {
+    const v = m[r][c];
+    if (v === m[r][c + 1] && v === m[r + 1][c] && v === m[r + 1][c + 1]) score += 3;
+  }
+  let dark = 0;
+  for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) dark += m[r][c];
+  score += Math.floor(Math.abs((dark * 100) / (size * size) - 50) / 5) * 10;
+  return score;
+}
+function applyFormat(m, size, ecc, mask) {
+  const bits = bchFormat((ECC_BITS[ecc] << 3) | mask);
+  for (let i = 0; i < 15; i++) {
+    const bit = (bits >> i) & 1;
+    if (i < 6) m[i][8] = bit;
+    else if (i < 8) m[i + 1][8] = bit;
+    else m[size - 15 + i][8] = bit;
+    if (i < 8) m[8][size - 1 - i] = bit;
+    else if (i === 8) m[8][7] = bit;
+    else m[8][14 - i] = bit;
+  }
+}
+function applyVersionInfo(m, size, version) {
+  if (version < 7) return;
+  const bits = bchVersion(version);
+  for (let i = 0; i < 18; i++) {
+    const bit = (bits >> i) & 1;
+    const r = Math.floor(i / 3), c = size - 11 + (i % 3);
+    m[r][c] = bit; m[c][r] = bit;
+  }
+}
+function encodeQR(text, ecc = 'm') {
+  const bytes = Array.from(new TextEncoder().encode(text));
+  const version = pickVersion(bytes.length, ecc);
+  if (!version) throw new Error(`Link is too long (${bytes.length} bytes) for error level ${ecc.toUpperCase()}`);
+  const size = 17 + version * 4;
+  const codewords = buildCodewords(bytes, version, ecc);
+  const { m: base, reserved } = drawFunctionPatterns(size, version);
+  placeData(base, reserved, codewords, size);
+  let best = null;
+  for (let mask = 0; mask < 8; mask++) {
+    const m = base.map((row, r) => {
+      const out = new Int8Array(size);
+      for (let c = 0; c < size; c++) out[c] = reserved[r][c] ? row[c] : (row[c] ^ (MASKS[mask](r, c) ? 1 : 0));
+      return out;
+    });
+    applyFormat(m, size, ecc, mask);
+    applyVersionInfo(m, size, version);
+    const score = penalty(m, size);
+    if (!best || score < best.score) best = { score, m, mask };
+  }
+  return { size, version, mask: best.mask, modules: best.m };
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Dot-matrix wordmark — the logo text is rasterised on a canvas and sampled
+   onto a grid, so any word works without shipping a bitmap font.
+   ══════════════════════════════════════════════════════════════════════════ */
+const WORDMARK = 'QRTREE';
+function buildWordmark(text, rows = 7) {
+  const cell = 12, pad = 2;
+  const probe = document.createElement('canvas').getContext('2d');
+  const fontPx = rows * cell * 1.36;                    // cap height ≈ rows cells
+  probe.font = `800 ${fontPx}px system-ui, sans-serif`;
+  const w = Math.ceil(probe.measureText(text).width);
+  const cv = document.createElement('canvas');
+  cv.width = w + cell * 2;
+  cv.height = Math.ceil(fontPx * 1.35);
+  const ctx = cv.getContext('2d');
+  ctx.font = `800 ${fontPx}px system-ui, sans-serif`;
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = '#000';
+  ctx.fillText(text, cell, fontPx);
+  const { data } = ctx.getImageData(0, 0, cv.width, cv.height);
+
+  const cols = Math.floor(cv.width / cell), gridRows = Math.floor(cv.height / cell);
+  const dots = [];
+  let minR = Infinity, maxR = -Infinity, minC = Infinity, maxC = -Infinity;
+  for (let r = 0; r < gridRows; r++) for (let c = 0; c < cols; c++) {
+    const x = Math.floor(c * cell + cell / 2), y = Math.floor(r * cell + cell / 2);
+    if (data[(y * cv.width + x) * 4 + 3] > 128) {
+      dots.push([c, r]);
+      if (r < minR) minR = r; if (r > maxR) maxR = r;
+      if (c < minC) minC = c; if (c > maxC) maxC = c;
+    }
+  }
+  if (!dots.length) return '';
+  const W = (maxC - minC + 1 + pad * 2), H = (maxR - minR + 1 + pad * 2);
+  const circles = dots.map(([c, r]) =>
+    `<circle cx="${(c - minC + pad) + .5}" cy="${(r - minR + pad) + .5}" r=".38"/>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${text}">${circles}</svg>`;
+}
+document.getElementById('logo').innerHTML = buildWordmark(WORDMARK);
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Seasons
+   ══════════════════════════════════════════════════════════════════════════ */
+const SEASONS = {
+  spring: {
+    bg: '#f7f2e9',
+    leaves: ['#8fc46a', '#a8d47c', '#c9e39b', '#f2b8cf', '#f7d3e2'],
+    blossom: 0.28,
+    grass: ['#8dc257', '#a3d167', '#79b04a'],
+    fall: '#f4c2d7',
+  },
+  summer: {
+    bg: '#f6f1e7',
+    leaves: ['#5aa63c', '#6fbb47', '#8ecb5c', '#4d9636', '#a4d873'],
+    blossom: 0,
+    grass: ['#63b23c', '#7cc44e', '#54a132'],
+    fall: '#7cc44e',
+  },
+  autumn: {
+    bg: '#f7efe1',
+    leaves: ['#d98a2b', '#c96a24', '#e0a93f', '#a8482a', '#e6c25c'],
+    blossom: 0,
+    grass: ['#a99244', '#bdaa55', '#8d7b3a'],
+    fall: '#d9822b',
+  },
+};
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Scene
+   ══════════════════════════════════════════════════════════════════════════ */
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+const scene = new THREE.Scene();
+const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -100, 200);
+
+const ambient = new THREE.AmbientLight(0xffffff, 0.72);
+const key = new THREE.DirectionalLight(0xfff6e2, 1.15);
+key.position.set(6, 12, 8);
+const rim = new THREE.DirectionalLight(0xd8e8ff, 0.35);
+rim.position.set(-7, 5, -6);
+scene.add(ambient, key, rim);
+
+const world = new THREE.Group();            // everything that fades out in QR mode
+scene.add(world);
+
+const rand = (seed => () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296)(20260826);
+const randRange = (a, b) => a + rand() * (b - a);
+
+/* ---------- ground: slab, paving, grass border ---------- */
+const GROUND = 9.2, TILES = 11, TILE = GROUND / TILES;
+const ground = new THREE.Group();
+world.add(ground);
+
+const slab = new THREE.Mesh(
+  new THREE.BoxGeometry(GROUND + .5, .55, GROUND + .5),
+  new THREE.MeshLambertMaterial({ color: 0xbdb7ab })
+);
+slab.position.y = -.3;
+ground.add(slab);
+
+const tileGeo = new THREE.BoxGeometry(TILE * .96, .16, TILE * .96);
+const tiles = new THREE.InstancedMesh(tileGeo, new THREE.MeshLambertMaterial(), TILES * TILES);
+{
+  const dummy = new THREE.Object3D(), color = new THREE.Color();
+  let i = 0;
+  for (let r = 0; r < TILES; r++) for (let c = 0; c < TILES; c++) {
+    const edge = r === 0 || c === 0 || r === TILES - 1 || c === TILES - 1;
+    const stagger = edge ? 0 : (r % 2 ? TILE * .5 : 0);   // brick-laid paving
+    dummy.position.set(
+      (c - (TILES - 1) / 2) * TILE + stagger,
+      edge ? -.06 : randRange(-.02, .02),
+      (r - (TILES - 1) / 2) * TILE
+    );
+    dummy.scale.set(edge ? 1 : randRange(.9, 1.5), 1, 1);
+    dummy.updateMatrix();
+    tiles.setMatrixAt(i, dummy.matrix);
+    const shade = edge ? 0 : randRange(-.09, .07);
+    color.setHSL(.09, .12, .82 + shade);
+    tiles.setColorAt(i, color);
+    i++;
+  }
+}
+ground.add(tiles);
+
+const GRASS_COUNT = 420;
+const grassGeo = new THREE.ConeGeometry(.075, .62, 4);
+grassGeo.translate(0, .31, 0);
+const grass = new THREE.InstancedMesh(grassGeo, new THREE.MeshLambertMaterial(), GRASS_COUNT);
+{
+  const dummy = new THREE.Object3D();
+  for (let i = 0; i < GRASS_COUNT; i++) {
+    // scatter along the border ring of the slab
+    const side = Math.floor(rand() * 4);
+    const along = randRange(-GROUND / 2, GROUND / 2);
+    const inset = randRange(GROUND / 2 - TILE * 1.05, GROUND / 2 + .1);
+    const x = side === 0 ? along : side === 1 ? along : side === 2 ? -inset : inset;
+    const z = side === 0 ? -inset : side === 1 ? inset : along;
+    dummy.position.set(x, .04, z);
+    dummy.rotation.set(randRange(-.22, .22), rand() * Math.PI, randRange(-.22, .22));
+    dummy.scale.set(1, randRange(.7, 1.5), 1);
+    dummy.updateMatrix();
+    grass.setMatrixAt(i, dummy.matrix);
+  }
+}
+ground.add(grass);
+
+const shadowTex = (() => {                       // soft blob shadow instead of shadow maps
+  const s = 128, cv = document.createElement('canvas');
+  cv.width = cv.height = s;
+  const ctx = cv.getContext('2d');
+  const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+  g.addColorStop(0, 'rgba(70,60,40,.34)');
+  g.addColorStop(.55, 'rgba(70,60,40,.16)');
+  g.addColorStop(1, 'rgba(70,60,40,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, s, s);
+  return new THREE.CanvasTexture(cv);
+})();
+const blob = new THREE.Mesh(
+  new THREE.PlaneGeometry(7.4, 7.4),
+  new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false })
+);
+blob.rotation.x = -Math.PI / 2;
+blob.position.y = .1;
+ground.add(blob);
+
+/* ---------- tree: recursive branches + leaf slots ---------- */
+const branches = [];      // { pos, quat, len, radius }
+const leafSlots = [];     // world positions for the canopy
+
+function grow(origin, dir, len, radius, depth) {
+  const end = origin.clone().addScaledVector(dir, len);
+  const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+  branches.push({ pos: origin.clone().addScaledVector(dir, len / 2), quat, len, radius });
+
+  if (depth >= 5 || len < .34) {
+    const blobSize = .52 + depth * .06;
+    const n = depth >= 4 ? 26 : 16;
+    for (let i = 0; i < n; i++) {
+      leafSlots.push(new THREE.Vector3(
+        end.x + randRange(-blobSize, blobSize),
+        end.y + randRange(-blobSize * .8, blobSize * .9),
+        end.z + randRange(-blobSize, blobSize)
+      ));
+    }
+    return;
+  }
+  const children = depth === 0 ? 3 : (rand() < .28 ? 3 : 2);
+  for (let i = 0; i < children; i++) {
+    const spread = depth === 0 ? .42 : randRange(.4, .74);
+    const azimuth = (i / children) * Math.PI * 2 + randRange(-.5, .5) + depth;
+    const axis = new THREE.Vector3(Math.cos(azimuth), 0, Math.sin(azimuth)).normalize();
+    const child = dir.clone().applyAxisAngle(axis, spread).normalize();
+    child.y = Math.max(child.y, depth < 2 ? .25 : -.15);           // keep the canopy lifting
+    child.normalize();
+    grow(end, child, len * randRange(.7, .82), radius * .66, depth + 1);
+  }
+}
+grow(new THREE.Vector3(0, .1, 0), new THREE.Vector3(0, 1, 0), 2.9, .32, 0);
+
+const branchGeo = new THREE.CylinderGeometry(.62, 1, 1, 6);
+const branchMesh = new THREE.InstancedMesh(
+  branchGeo,
+  new THREE.MeshLambertMaterial({ transparent: true }),
+  branches.length
+);
+{
+  const dummy = new THREE.Object3D(), color = new THREE.Color();
+  branches.forEach((b, i) => {
+    dummy.position.copy(b.pos);
+    dummy.quaternion.copy(b.quat);
+    dummy.scale.set(b.radius, b.len * 1.02, b.radius);
+    dummy.updateMatrix();
+    branchMesh.setMatrixAt(i, dummy.matrix);
+    color.setHSL(.07, .38, randRange(.24, .34));
+    branchMesh.setColorAt(i, color);
+  });
+}
+world.add(branchMesh);
+
+/* ---------- leaves: the canopy that becomes the QR ---------- */
+const LEAF_MAX = Math.min(leafSlots.length, 3200);
+const leafGeo = new THREE.BoxGeometry(1, 1, 1);
+const leafMat = new THREE.MeshLambertMaterial({ transparent: true });
+const leaves = new THREE.InstancedMesh(leafGeo, leafMat, LEAF_MAX);
+leaves.frustumCulled = false;
+world.add(leaves);
+
+const leaf = [];                                  // per-instance state
+for (let i = 0; i < LEAF_MAX; i++) {
+  const home = leafSlots[i];
+  leaf.push({
+    home,
+    target: home.clone(),
+    size: randRange(.34, .52),
+    targetSize: 0,
+    rot: new THREE.Euler(rand() * Math.PI, rand() * Math.PI, rand() * Math.PI),
+    phase: rand() * Math.PI * 2,
+    sway: randRange(.4, 1),
+    homeColor: new THREE.Color(),
+    qrColor: new THREE.Color(),
+    lift: randRange(.6, 2.4),
+    active: false,
+  });
+}
+
+function paintCanopy(seasonKey) {
+  const s = SEASONS[seasonKey];
+  const palette = s.leaves.map(hex => new THREE.Color(hex));
+  const hsl = {};
+  leaf.forEach(l => {
+    l.homeColor.copy(palette[Math.floor(rand() * palette.length)]);
+    // Read from above the canopy keeps its season colour, only deep enough that a
+    // scanner still separates it from the pale ground.
+    l.homeColor.getHSL(hsl);
+    l.qrColor.setHSL(hsl.h, Math.min(hsl.s * 1.2, 1), Math.min(hsl.l, .3));
+  });
+  const gp = s.grass.map(hex => new THREE.Color(hex));
+  const c = new THREE.Color();
+  for (let i = 0; i < GRASS_COUNT; i++) {
+    c.copy(gp[i % gp.length]).offsetHSL(0, 0, randRange(-.04, .04));
+    grass.setColorAt(i, c);
+  }
+  grass.instanceColor.needsUpdate = true;
+  document.getElementById('app').style.background = s.bg;
+  scene.background = null;
+}
+
+/* ---------- drifting particles (petals / falling leaves) ---------- */
+const DRIFT = 90;
+const drift = new THREE.InstancedMesh(
+  new THREE.PlaneGeometry(.22, .22),
+  new THREE.MeshLambertMaterial({ side: THREE.DoubleSide, transparent: true }),
+  DRIFT
+);
+drift.frustumCulled = false;
+world.add(drift);
+const drifters = Array.from({ length: DRIFT }, () => ({
+  x: randRange(-4, 4), y: randRange(0, 9), z: randRange(-4, 4),
+  vy: randRange(.25, .7), phase: rand() * 6.28, spin: randRange(-2, 2),
+}));
+
+/* ══════════════════════════════════════════════════════════════════════════
+   QR ⇄ tree morph
+   ══════════════════════════════════════════════════════════════════════════ */
+// The code lies flat where the tree stands: you read it by looking straight down.
+const PLANE_W = 8.6, PLANE_Y = .42;
+let mode = 'tree';
+let t = 0;                                         // 0 = tree, 1 = QR
+const easeInOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+
+function eccFor(text) {
+  const len = new TextEncoder().encode(text).length;
+  return len <= 40 ? 'q' : len <= 130 ? 'm' : 'l';
+}
+
+/** Assign each leaf a module of the QR code, keeping neighbours together so the
+ *  canopy unfolds rather than scrambles. */
+function buildQrTargets(text) {
+  const { size, modules } = encodeQR(text, eccFor(text));
+  const cell = PLANE_W / size;
+
+  const dark = [];
+  for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
+    if (modules[r][c]) dark.push({ r, c });
+  }
+  if (dark.length > LEAF_MAX) throw new Error('Link needs more modules than this tree has leaves');
+
+  // Both sides are ordered by their footprint seen from above, so a leaf settles
+  // onto a module more or less straight below it instead of flying across.
+  const BANDS = 26;
+  const bandKey = (u, v) => Math.round(v * BANDS) * (BANDS + 1) + u;
+  const box = new THREE.Box3().setFromPoints(leaf.map(l => l.home));
+  const span = new THREE.Vector3().subVectors(box.max, box.min);
+  const leafOrder = leaf.map((l, i) => {
+    const u = (l.home.x - box.min.x) / (span.x || 1);
+    const v = (l.home.z - box.min.z) / (span.z || 1);
+    return { i, key: bandKey(u, v) + (l.home.y - box.min.y) * .001 };
+  }).sort((a, b) => a.key - b.key);
+  const moduleOrder = dark.map(d => ({ ...d, key: bandKey(d.c / size, d.r / size) }))
+                          .sort((a, b) => a.key - b.key);
+
+  leaf.forEach(l => { l.active = false; l.targetSize = 0; });
+  moduleOrder.forEach((mod, n) => {
+    const l = leaf[leafOrder[n].i];
+    l.active = true;
+    l.targetSize = cell;
+    l.target.set(                                   // row runs away from the viewer
+      (mod.c - (size - 1) / 2) * cell,
+      PLANE_Y,
+      (mod.r - (size - 1) / 2) * cell
+    );
+  });
+  // Unused leaves drift outwards and shrink away.
+  leaf.forEach(l => {
+    if (l.active) return;
+    l.target.set(l.home.x * 1.8, PLANE_Y + 1.2, l.home.z * 1.8);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Camera framing — isometric for the tree, straight overhead for the QR
+   ══════════════════════════════════════════════════════════════════════════ */
+const ISO_TARGET = new THREE.Vector3(0, 3.7, 0);
+const QR_TARGET = new THREE.Vector3(0, PLANE_Y, 0);
+const isoDir = (() => {
+  const az = Math.PI / 4, el = 0.62;
+  return new THREE.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)).normalize();
+})();
+const qrDir = new THREE.Vector3(0, 1, 0);           // bird's eye
+const ISO_UP = new THREE.Vector3(0, 1, 0);
+const QR_UP = new THREE.Vector3(0, 0, -1);          // looking down, north is up
+
+let exportSize = null;                              // set while rendering frames for a file
+
+function layout() {
+  const w = exportSize ? exportSize.w : canvas.clientWidth;
+  const h = exportSize ? exportSize.h : canvas.clientHeight;
+  renderer.setSize(w, h, false);                    // false: leave the CSS size alone
+  const aspect = w / h;
+  // Fit both dimensions: on a tall phone the width is what runs out first, and a
+  // clipped QR code will not scan.
+  // Seen isometrically the square ground reads as a diamond √2 times as wide.
+  const wantW = THREE.MathUtils.lerp(14.4, PLANE_W * 1.18, t);
+  const wantH = THREE.MathUtils.lerp(15.2, PLANE_W * 1.18, t);
+  const viewHeight = Math.max(wantH, wantW / aspect);
+  camera.top = viewHeight / 2;
+  camera.bottom = -viewHeight / 2;
+  camera.left = -viewHeight * aspect / 2;
+  camera.right = viewHeight * aspect / 2;
+  camera.updateProjectionMatrix();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Sound — everything is synthesised, no audio files
+   ══════════════════════════════════════════════════════════════════════════ */
+const audio = {
+  ctx: null, gain: null, on: false,
+  start() {
+    if (this.ctx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    this.ctx = new AC();
+    this.gain = this.ctx.createGain();
+    this.gain.gain.value = 0;
+    this.gain.connect(this.ctx.destination);
+
+    const frames = this.ctx.sampleRate * 3;
+    const buf = this.ctx.createBuffer(1, frames, this.ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < frames; i++) {                  // brown noise = wind
+      last = (last + (Math.random() * 2 - 1) * .04) * .995;
+      data[i] = last * 3.2;
+    }
+    const src = this.ctx.createBufferSource();
+    src.buffer = buf; src.loop = true;
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass'; filter.frequency.value = 420;
+    const lfo = this.ctx.createOscillator();
+    lfo.frequency.value = .07;
+    const lfoGain = this.ctx.createGain();
+    lfoGain.gain.value = 200;
+    lfo.connect(lfoGain).connect(filter.frequency);
+    src.connect(filter).connect(this.gain);
+    src.start(); lfo.start();
+  },
+  toggle() {
+    this.start();
+    if (!this.ctx) return false;
+    this.ctx.resume();
+    this.on = !this.on;
+    this.gain.gain.cancelScheduledValues(this.ctx.currentTime);
+    this.gain.gain.linearRampToValueAtTime(this.on ? .16 : 0, this.ctx.currentTime + .4);
+    return this.on;
+  },
+  chime(freq = 660) {
+    if (!this.ctx || !this.on) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const env = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, now);
+    env.gain.setValueAtTime(0, now);
+    env.gain.linearRampToValueAtTime(.12, now + .02);
+    env.gain.exponentialRampToValueAtTime(.0005, now + 1.1);
+    osc.connect(env).connect(this.gain);
+    osc.start(now); osc.stop(now + 1.2);
+  },
+};
+
+/* ══════════════════════════════════════════════════════════════════════════
+   UI wiring
+   ══════════════════════════════════════════════════════════════════════════ */
+const urlInput = document.getElementById('url');
+const hint = document.getElementById('hint');
+const peekLabel = document.getElementById('peek-label');
+const toastEl = document.getElementById('toast');
+let toastTimer;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
+}
+
+function currentLink() {
+  const raw = urlInput.value.trim();
+  if (!raw) return 'https://example.com/';
+  return /^[a-z][a-z0-9+.-]*:/i.test(raw) ? raw : 'https://' + raw;
+}
+
+function setMode(next) {
+  if (next === mode) return;
+  if (next === 'qr') {
+    try {
+      buildQrTargets(currentLink());
+    } catch (err) {
+      toast(err.message);
+      return;
+    }
+  }
+  mode = next;
+  hint.textContent = mode === 'qr' ? 'Tap the code to grow the tree back' : 'Tap the tree to see QR code';
+  peekLabel.textContent = mode === 'qr' ? 'I see tree' : 'I see QR';
+  audio.chime(mode === 'qr' ? 880 : 520);
+}
+const toggleMode = () => setMode(mode === 'tree' ? 'qr' : 'tree');
+
+document.getElementById('peek').addEventListener('click', toggleMode);
+canvas.addEventListener('pointerdown', toggleMode);
+
+let season = 'summer';
+document.querySelectorAll('.seasons [data-season]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    season = btn.dataset.season;
+    document.querySelectorAll('.seasons [data-season]').forEach(b =>
+      b.setAttribute('aria-pressed', String(b === btn)));
+    paintCanopy(season);
+    audio.chime(season === 'spring' ? 740 : season === 'summer' ? 620 : 480);
+  });
+});
+
+const muteBtn = document.getElementById('mute');
+muteBtn.addEventListener('click', () => {
+  const on = audio.toggle();
+  muteBtn.setAttribute('aria-pressed', String(on));
+  document.getElementById('mute-on').style.display = on ? 'none' : '';
+  document.getElementById('mute-off').style.display = on ? '' : 'none';
+});
+
+/** Share the tree itself when the page is on the web, the bare link otherwise. */
+function shareUrl() {
+  const link = currentLink();
+  if (!location.protocol.startsWith('http')) return link;
+  return `${location.origin}${location.pathname}?u=${encodeURIComponent(link)}#qr`;
+}
+
+/** The Clipboard API only exists in a secure context, so a page served over plain
+ *  http has to fall back to the old selection-based copy. */
+async function copyText(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return true;
+  }
+  const field = document.createElement('textarea');
+  field.value = text;
+  field.setAttribute('readonly', '');
+  field.style.cssText = 'position:fixed;top:0;left:-9999px';
+  document.body.append(field);
+  field.select();
+  field.setSelectionRange(0, text.length);
+  const ok = document.execCommand('copy');
+  field.remove();
+  return ok;
+}
+
+document.getElementById('share').addEventListener('click', async () => {
+  const link = shareUrl();
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: 'Magic Tree', text: 'A tree that is also a QR code', url: link });
+      return;
+    }
+    toast(await copyText(link) ? 'Link copied' : 'Could not copy — select the link by hand');
+  } catch (err) {
+    if (err?.name !== 'AbortError') toast('Could not share — copy it by hand');
+  }
+});
+
+const about = document.getElementById('about');
+document.getElementById('info').addEventListener('click', () => about.showModal());
+document.getElementById('about-close').addEventListener('click', () => about.close());
+about.addEventListener('click', e => { if (e.target === about) about.close(); });
+
+urlInput.addEventListener('change', () => {
+  if (mode !== 'qr') return;
+  try { buildQrTargets(currentLink()); }
+  catch (err) { toast(err.message); setMode('tree'); }
+});
+urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') urlInput.blur(); });
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Render loop
+   ══════════════════════════════════════════════════════════════════════════ */
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const dummy = new THREE.Object3D();
+const tmpColor = new THREE.Color();
+const camPos = new THREE.Vector3(), camTarget = new THREE.Vector3(), camDir = new THREE.Vector3();
+let last = performance.now();
+
+/** Draw one frame. Everything the scene shows is a function of `time` (idle drift)
+ *  and `tValue` (0 tree → 1 code), so the exporter can drive it off its own clock. */
+function renderScene(time, tValue, dt) {
+  const e = easeInOut(tValue);
+
+  // camera: orbit slowly around the tree, swing straight on for the QR
+  camDir.copy(isoDir).lerp(qrDir, e).normalize();
+  if (e < .999 && !reduceMotion) {
+    const drift = Math.sin(time * .12) * .16 * (1 - e);
+    camDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), drift);
+  }
+  camTarget.copy(ISO_TARGET).lerp(QR_TARGET, e);
+  camPos.copy(camTarget).addScaledVector(camDir, 40);
+  camera.position.copy(camPos);
+  camera.up.copy(ISO_UP).lerp(QR_UP, e).normalize();   // straight down needs a new up
+  camera.lookAt(camTarget);
+  layout();
+
+  // the QR needs a clean, evenly lit background to scan
+  ambient.intensity = THREE.MathUtils.lerp(.72, 1.35, e);
+  key.intensity = THREE.MathUtils.lerp(1.15, .12, e);
+  rim.intensity = THREE.MathUtils.lerp(.35, 0, e);
+  const worldFade = 1 - e;
+  branchMesh.material.opacity = worldFade;
+  tiles.material.opacity = worldFade;
+  grass.material.opacity = worldFade;
+  drift.material.opacity = worldFade * .95;
+  slab.material.opacity = worldFade;
+  blob.material.opacity = worldFade;
+  [branchMesh, tiles, grass, slab, blob].forEach(m => { m.material.transparent = true; });
+  ground.visible = worldFade > .01;
+  branchMesh.visible = worldFade > .01;
+
+  // leaves
+  for (let i = 0; i < LEAF_MAX; i++) {
+    const l = leaf[i];
+    const sway = reduceMotion ? 0 : Math.sin(time * .9 + l.phase) * .08 * l.sway * (1 - e);
+    dummy.position.set(
+      THREE.MathUtils.lerp(l.home.x + sway, l.target.x, e),
+      THREE.MathUtils.lerp(l.home.y + sway * .4, l.target.y, e) + Math.sin(e * Math.PI) * l.lift * (l.active ? .5 : 1.4),
+      THREE.MathUtils.lerp(l.home.z + sway, l.target.z, e)
+    );
+    dummy.rotation.set(
+      THREE.MathUtils.lerp(l.rot.x + sway, 0, e),
+      THREE.MathUtils.lerp(l.rot.y, 0, e),
+      THREE.MathUtils.lerp(l.rot.z + sway, 0, e)
+    );
+    const side = THREE.MathUtils.lerp(l.size, l.targetSize, e);   // a leaf flattens into a tile
+    dummy.scale.set(side, THREE.MathUtils.lerp(l.size, l.targetSize * .34, e), side);
+    dummy.updateMatrix();
+    leaves.setMatrixAt(i, dummy.matrix);
+    tmpColor.copy(l.homeColor).lerp(l.qrColor, e);
+    leaves.setColorAt(i, tmpColor);
+  }
+  leaves.instanceMatrix.needsUpdate = true;
+  leaves.instanceColor.needsUpdate = true;
+
+  // drifting petals / falling leaves
+  const driftColor = new THREE.Color(SEASONS[season].fall);
+  const showDrift = season !== 'summer' && worldFade > .01;
+  drift.visible = showDrift;
+  if (showDrift) {
+    drifters.forEach((d, i) => {
+      d.y -= d.vy * dt;
+      if (d.y < .2) { d.y = randRange(7, 10); d.x = randRange(-4, 4); d.z = randRange(-4, 4); }
+      dummy.position.set(d.x + Math.sin(time * .8 + d.phase) * .5, d.y, d.z + Math.cos(time * .6 + d.phase) * .5);
+      dummy.rotation.set(time * d.spin * .4, time * d.spin * .3, d.phase);
+      dummy.scale.setScalar(1);
+      dummy.updateMatrix();
+      drift.setMatrixAt(i, dummy.matrix);
+      drift.setColorAt(i, driftColor);
+    });
+    drift.instanceMatrix.needsUpdate = true;
+    drift.instanceColor.needsUpdate = true;
+  }
+
+  renderer.render(scene, camera);
+}
+
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, .05);
+  last = now;
+  if (!exportSize) {                                // the exporter owns the canvas while it runs
+    const goal = mode === 'qr' ? 1 : 0;
+    t += (goal - t) * Math.min(dt * 3.4, 1);
+    if (Math.abs(goal - t) < .001) t = goal;
+    renderScene(now / 1000, t, dt);
+    hint.style.opacity = t > .02 && t < .98 ? .35 : 1;
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Export — the clip holds on the tree, then plays the tap into the QR code
+   ══════════════════════════════════════════════════════════════════════════ */
+const CLIP = { hold: 1.4, morph: 1.7, tail: 2.5 };
+const CLIP_SECONDS = CLIP.hold + CLIP.morph + CLIP.tail;
+const timelineT = (sec) =>
+  sec <= CLIP.hold ? 0 :
+  sec >= CLIP.hold + CLIP.morph ? 1 :
+  (sec - CLIP.hold) / CLIP.morph;
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+const grabCanvas = document.createElement('canvas');
+const grabCtx = grabCanvas.getContext('2d', { willReadFrequently: true });
+
+/** Render one clip frame and read it back, composited over the season backdrop
+ *  (the WebGL canvas itself is transparent). */
+function grabFrame(sec, size, dt) {
+  renderScene(sec, timelineT(sec), dt);
+  grabCanvas.width = size; grabCanvas.height = size;
+  grabCtx.fillStyle = SEASONS[season].bg;
+  grabCtx.fillRect(0, 0, size, size);
+  grabCtx.drawImage(canvas, 0, 0);
+  return grabCtx.getImageData(0, 0, size, size).data;
+}
+
+/* ── GIF encoding: median-cut palette, LZW, transparent delta frames ── */
+function buildPalette(frames, maxColors) {
+  const hist = new Map();
+  for (const px of frames) {
+    const step = 4 * Math.max(1, Math.round(px.length / 4 / 24000));
+    for (let i = 0; i < px.length; i += step) {
+      const r = px[i], g = px[i + 1], b = px[i + 2];
+      const key = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
+      const e = hist.get(key);
+      if (e) { e.n++; e.r += r; e.g += g; e.b += b; }
+      else hist.set(key, { n: 1, r, g, b });
+    }
+  }
+  let boxes = [[...hist.values()]];
+  while (boxes.length < maxColors) {
+    let pick = -1, pickCh = 'r', widest = 0;
+    boxes.forEach((box, i) => {                     // split whichever box spans the most colour
+      if (box.length < 2) return;
+      for (const ch of ['r', 'g', 'b']) {
+        let lo = 255, hi = 0;
+        for (const c of box) { const v = c[ch] / c.n; if (v < lo) lo = v; if (v > hi) hi = v; }
+        if (hi - lo > widest) { widest = hi - lo; pick = i; pickCh = ch; }
+      }
+    });
+    if (pick < 0) break;
+    const box = boxes[pick];
+    box.sort((a, b) => a[pickCh] / a.n - b[pickCh] / b.n);
+    const total = box.reduce((s, c) => s + c.n, 0);
+    let acc = 0, cut = 1;
+    for (let i = 0; i < box.length; i++) {
+      acc += box[i].n;
+      if (acc * 2 >= total) { cut = Math.min(Math.max(i + 1, 1), box.length - 1); break; }
+    }
+    boxes.splice(pick, 1, box.slice(0, cut), box.slice(cut));
+  }
+  return boxes.map(box => {
+    let n = 0, r = 0, g = 0, b = 0;
+    for (const c of box) { n += c.n; r += c.r; g += c.g; b += c.b; }
+    return [Math.round(r / n), Math.round(g / n), Math.round(b / n)];
+  });
+}
+
+function makeMapper(palette) {
+  const cache = new Int16Array(32768).fill(-1);     // one slot per 15-bit colour
+  return (r, g, b) => {
+    const key = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
+    const hit = cache[key];
+    if (hit >= 0) return hit;
+    let best = 0, bestD = Infinity;
+    for (let i = 0; i < palette.length; i++) {
+      const p = palette[i];
+      const dr = r - p[0], dg = g - p[1], db = b - p[2];
+      const d = dr * dr * 3 + dg * dg * 4 + db * db * 2;
+      if (d < bestD) { bestD = d; best = i; }
+    }
+    cache[key] = best;
+    return best;
+  };
+}
+
+function lzwEncode(indices, minCodeSize) {
+  const clear = 1 << minCodeSize, end = clear + 1;
+  let codeSize = minCodeSize + 1, next = end + 1;
+  let dict = new Map();
+  const out = [];
+  let cur = 0, curBits = 0;
+  const emit = (code) => {
+    cur |= code << curBits;
+    curBits += codeSize;
+    while (curBits >= 8) { out.push(cur & 0xff); cur >>>= 8; curBits -= 8; }
+  };
+  emit(clear);
+  let prefix = indices[0];
+  for (let i = 1; i < indices.length; i++) {
+    const k = indices[i];
+    const key = prefix * 256 + k;
+    const found = dict.get(key);
+    if (found !== undefined) { prefix = found; continue; }
+    emit(prefix);
+    if (next < 4096) {
+      dict.set(key, next++);
+      // The decoder's table lags one entry behind ours, so the code width may only
+      // grow once our next free code passes the current width.
+      if (next > (1 << codeSize) && codeSize < 12) codeSize++;
+    } else {
+      emit(clear);
+      dict = new Map(); next = end + 1; codeSize = minCodeSize + 1;
+    }
+    prefix = k;
+  }
+  emit(prefix);
+  emit(end);
+  if (curBits > 0) out.push(cur & 0xff);
+  return out;
+}
+
+function createGifWriter(w, h, palette) {
+  const toIndex = makeMapper(palette);
+  const transparent = palette.length;               // one spare slot past the real colours
+  let bits = 1;
+  while ((1 << bits) < palette.length + 1) bits++;
+  const tableSize = 1 << bits;
+
+  let data = new Uint8Array(1 << 20), len = 0;
+  const need = (n) => {
+    if (len + n <= data.length) return;
+    let cap = data.length;
+    while (cap < len + n) cap *= 2;
+    const next = new Uint8Array(cap);
+    next.set(data.subarray(0, len));
+    data = next;
+  };
+  const byte = (v) => { need(1); data[len++] = v & 0xff; };
+  const u16 = (v) => { byte(v); byte(v >> 8); };
+  const str = (s) => { for (let i = 0; i < s.length; i++) byte(s.charCodeAt(i)); };
+
+  str('GIF89a');
+  u16(w); u16(h);
+  byte(0x80 | 0x70 | (bits - 1)); byte(0); byte(0);
+  for (let i = 0; i < tableSize; i++) {
+    const c = palette[i] || [0, 0, 0];
+    byte(c[0]); byte(c[1]); byte(c[2]);
+  }
+  str('\x21\xff\x0bNETSCAPE2.0');                   // loop forever
+  byte(3); byte(1); u16(0); byte(0);
+
+  let previous = null;
+  return {
+    addFrame(px, delayCs) {
+      const idx = new Uint8Array(w * h);
+      for (let p = 0, i = 0; p < idx.length; p++, i += 4) idx[p] = toIndex(px[i], px[i + 1], px[i + 2]);
+
+      // only the rectangle that actually changed needs to be stored
+      let x0 = 0, y0 = 0, x1 = w - 1, y1 = h - 1;
+      const delta = previous !== null;
+      if (delta) {
+        x0 = w; y0 = h; x1 = -1; y1 = -1;
+        for (let y = 0; y < h; y++) {
+          const row = y * w;
+          for (let x = 0; x < w; x++) {
+            if (idx[row + x] !== previous[row + x]) {
+              if (x < x0) x0 = x;
+              if (x > x1) x1 = x;
+              if (y < y0) y0 = y;
+              if (y > y1) y1 = y;
+            }
+          }
+        }
+        if (x1 < x0) { x0 = 0; y0 = 0; x1 = 0; y1 = 0; }   // nothing moved: 1×1 stub
+      }
+      const fw = x1 - x0 + 1, fh = y1 - y0 + 1;
+      const sub = new Uint8Array(fw * fh);
+      for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) {
+        const src = (y0 + y) * w + x0 + x;
+        sub[y * fw + x] = (delta && previous[src] === idx[src]) ? transparent : idx[src];
+      }
+
+      byte(0x21); byte(0xf9); byte(4);
+      byte(delta ? 0x05 : 0x04);                    // disposal "leave in place" (+ transparency)
+      u16(delayCs);
+      byte(delta ? transparent : 0); byte(0);
+      byte(0x2c); u16(x0); u16(y0); u16(fw); u16(fh); byte(0);
+      const minCode = Math.max(2, bits);
+      byte(minCode);
+      const packed = lzwEncode(sub, minCode);
+      for (let i = 0; i < packed.length; i += 255) {
+        const chunk = packed.slice(i, i + 255);
+        byte(chunk.length);
+        need(chunk.length);
+        data.set(chunk, len);
+        len += chunk.length;
+      }
+      byte(0);
+      previous = idx;
+    },
+    finish() {
+      byte(0x3b);
+      return new Blob([data.slice(0, len)], { type: 'image/gif' });
+    },
+  };
+}
+
+async function renderGif({ size, fps, onProgress }) {
+  const total = Math.round(CLIP_SECONDS * fps), dt = 1 / fps;
+  const samples = [];
+  for (let i = 0; i < total; i += 5) samples.push(grabFrame(i / fps, size, dt));
+  onProgress(.12, 'choosing colours');
+  const writer = createGifWriter(size, size, buildPalette(samples, 255));
+  samples.length = 0;
+  const delay = Math.round(100 / fps);
+  for (let i = 0; i < total; i++) {
+    writer.addFrame(grabFrame(i / fps, size, dt), delay);
+    if (i % 3 === 0) {
+      onProgress(.12 + .86 * (i / total), 'encoding');
+      await sleep(0);                               // keep the page responsive
+    }
+  }
+  return { blob: writer.finish(), ext: 'gif' };
+}
+
+/** Wait for a wall-clock deadline using frames rather than timers: background tabs
+ *  clamp setTimeout, which would stretch the recording into slow motion. */
+const waitUntil = (due) => new Promise(res => {
+  const tick = () => (performance.now() >= due ? res() : requestAnimationFrame(tick));
+  requestAnimationFrame(tick);
+});
+
+async function renderVideo({ size, fps, onProgress }) {
+  const mime = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4']
+    .find(m => window.MediaRecorder?.isTypeSupported?.(m));
+  if (!mime) throw new Error('This browser cannot record video — use the GIF instead');
+  if (document.hidden) throw new Error('Bring this tab to the front — video records in real time');
+  const stream = canvas.captureStream(0);
+  const track = stream.getVideoTracks()[0];
+  const chunks = [];
+  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 12e6 });
+  rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+  const stopped = new Promise(r => { rec.onstop = r; });
+  rec.start();
+  // MediaRecorder timestamps frames by the wall clock, so the clip has to play out
+  // at its real speed while it records.
+  const total = Math.round(CLIP_SECONDS * fps), dt = 1 / fps;
+  const started = performance.now();
+  try {
+    for (let i = 0; i < total; i++) {
+      renderScene(i / fps, timelineT(i / fps), dt);
+      track.requestFrame();
+      onProgress(i / total, 'recording');
+      await waitUntil(started + (i + 1) * 1000 / fps);
+      if (document.hidden) throw new Error('Recording stopped — the tab moved to the background');
+    }
+  } finally {
+    rec.stop();
+    await stopped;
+    track.stop();
+  }
+  return { blob: new Blob(chunks, { type: mime }), ext: mime.includes('mp4') ? 'mp4' : 'webm' };
+}
+
+const exportDialog = document.getElementById('export');
+const exportStatus = document.getElementById('export-status');
+const exportButtons = [document.getElementById('export-gif'), document.getElementById('export-video')];
+let exporting = false;
+
+async function runExport(kind) {
+  if (exporting) return;
+  try {
+    buildQrTargets(currentLink());                  // the clip always ends on the code
+  } catch (err) {
+    exportStatus.textContent = err.message;
+    return;
+  }
+  exporting = true;
+  exportButtons.forEach(b => { b.disabled = true; });
+  const size = kind === 'gif' ? 480 : 720;
+  const pixelRatio = renderer.getPixelRatio();
+  renderer.setPixelRatio(1);
+  // The page normally supplies the backdrop through CSS; a recorded canvas has to
+  // carry it itself or the clip comes out on black.
+  scene.background = new THREE.Color(SEASONS[season].bg);
+  exportSize = { w: size, h: size };
+  const onProgress = (p, label) => {
+    exportStatus.textContent = `${label} — ${Math.round(p * 100)}%`;
+  };
+  try {
+    onProgress(0, 'rendering');
+    const { blob, ext } = kind === 'gif'
+      ? await renderGif({ size, fps: 100 / 6, onProgress })   // GIF delays are whole centiseconds
+      : await renderVideo({ size, fps: 30, onProgress });
+    downloadBlob(blob, `magic-tree.${ext}`);
+    exportStatus.textContent = `saved · ${(blob.size / 1048576).toFixed(1)} MB`;
+  } catch (err) {
+    exportStatus.textContent = err.message;
+  } finally {
+    exportSize = null;
+    scene.background = null;
+    renderer.setPixelRatio(pixelRatio);
+    layout();
+    exporting = false;
+    exportButtons.forEach(b => { b.disabled = false; });
+  }
+}
+
+document.getElementById('download').addEventListener('click', () => {
+  exportStatus.textContent = '';
+  exportDialog.showModal();
+});
+document.getElementById('export-gif').addEventListener('click', () => runExport('gif'));
+document.getElementById('export-video').addEventListener('click', () => runExport('video'));
+document.getElementById('export-close').addEventListener('click', () => exportDialog.close());
+exportDialog.addEventListener('click', e => { if (e.target === exportDialog && !exporting) exportDialog.close(); });
+exportDialog.addEventListener('cancel', e => { if (exporting) e.preventDefault(); });
+
+// Restore state from the URL: ?u=<link> preloads a link, #qr opens on the code.
+{
+  const params = new URLSearchParams(location.search);
+  if (params.get('u')) urlInput.value = params.get('u');
+  if (location.hash === '#qr' || params.has('qr')) {
+    try {
+      buildQrTargets(currentLink());
+      mode = 'qr';
+      t = 1;                                        // already there, no fly-in
+      hint.textContent = 'Tap the code to grow the tree back';
+      peekLabel.textContent = 'I see tree';
+    } catch (err) { toast(err.message); }
+  }
+}
+
+paintCanopy(season);
+addEventListener('resize', layout);
+layout();
+requestAnimationFrame(frame);
+// Hide the placeholder once something has been drawn; the timeout covers tabs
+// that get restored in the background, where rAF may not fire for a while.
+const revealScene = () => document.getElementById('loading').classList.add('done');
+requestAnimationFrame(revealScene);
+setTimeout(revealScene, 400);
+</script>
+</body>
+</html>
