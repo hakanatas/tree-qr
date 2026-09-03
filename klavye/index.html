@@ -67,7 +67,7 @@
   b { font-weight: 700; }
 
   /* ---------- Giriş animasyonları ---------- */
-  .reveal { animation: rise .7s cubic-bezier(.2, .9, .3, 1.2) both; animation-delay: var(--d, 0s); }
+  html.js .reveal { animation: rise .7s cubic-bezier(.2, .9, .3, 1.2) both; animation-delay: var(--d, 0s); }
   @keyframes rise { from { opacity: 0; transform: translateY(26px) rotate(-1deg); } to { opacity: 1; transform: none; } }
 
   /* ---------- Başlık ---------- */
@@ -176,8 +176,8 @@
     font-size: clamp(9px, 1.45vw, 16px); font-weight: 700; color: #3b332c;
     transition: transform .08s, box-shadow .08s, background .2s;
     touch-action: manipulation;
-    animation: keyIn .5s cubic-bezier(.2, 1.2, .3, 1) both; animation-delay: calc(.35s + var(--i, 0) * 12ms);
   }
+  html.js .key { animation: keyIn .5s cubic-bezier(.2, 1.2, .3, 1) both; animation-delay: calc(.35s + var(--i, 0) * 12ms); }
   @keyframes keyIn { from { opacity: 0; transform: translateY(-14px) scale(.8); } to { opacity: 1; transform: none; } }
   .key .top { font-size: .75em; line-height: 1; color: #7a6a60; }
   .key .main { line-height: 1.1; }
@@ -506,6 +506,7 @@
 <script>
 (() => {
   'use strict';
+  document.documentElement.classList.add('js');
 
   /* ================= SOUND ================= */
   let audio = null, soundOn = true;
