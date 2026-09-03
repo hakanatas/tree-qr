@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Mac Klavye Tuşları ve İşlevleri — Eğlenceli Klavye Okulu</title>
+<meta name="description" content="İlkokul öğrencileri için eğlenceli Mac klavye rehberi: tuşlara dokun, ne işe yaradıklarını öğren, deneyler yap ve Hangi Tuş? oyununu oyna!" />
+<meta name="theme-color" content="#f9c9a9" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg1: #fbd6bb;
+    --bg2: #f6b99b;
+    --card: #fff7ee;
+    --clay: #f3ead9;
+    --clay-dark: #c9b899;
+    --ink: #3a2c26;
+    --ink-soft: #7a5f52;
+    --green: #78d9b0;   --green-d: #3fae86;
+    --coral: #f7907d;   --coral-d: #d2604f;
+    --purple: #c8a8e8;  --purple-d: #9a74c6;
+    --yellow: #f4c04b;  --yellow-d: #cf9a20;
+    --blue: #4d6fd0;    --blue-d: #2f4ea3;
+    --magenta: #b64a86; --magenta-d: #8a2f62;
+    --key: #f6f1e7;     --key-d: #c8bfae;
+    --radius: 22px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Fredoka", "Nunito", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: linear-gradient(160deg, var(--bg1), var(--bg2) 60%, #f0a98a);
+    background-attachment: fixed;
+    min-height: 100vh;
+    line-height: 1.45;
+    overflow-x: hidden;
+  }
+  button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+  main { width: min(1040px, 100% - 24px); margin: 0 auto; padding-bottom: 60px; }
+
+  /* ---------- Decor ---------- */
+  .blob { position: fixed; border-radius: 50%; filter: blur(2px); opacity: .55; z-index: -1; pointer-events: none; }
+  .blob.a { width: 260px; height: 260px; background: #c7b6f0; top: -80px; left: -90px; }
+  .blob.b { width: 180px; height: 180px; background: #ffe7a8; bottom: 10%; right: -60px; }
+  .blob.c { width: 120px; height: 120px; background: #a9e7cf; top: 40%; left: -40px; }
+
+  /* ---------- Header ---------- */
+  header { text-align: center; padding: 34px 0 10px; position: relative; }
+  .title {
+    display: inline-block;
+    font-weight: 700;
+    font-size: clamp(28px, 5.4vw, 54px);
+    letter-spacing: .5px;
+    background: var(--clay);
+    color: #5a4535;
+    padding: 12px 28px;
+    border-radius: 30px;
+    box-shadow: 0 8px 0 var(--clay-dark), 0 18px 30px rgba(120, 70, 40, .22);
+    transform: rotate(-1.5deg);
+    animation: pop .7s cubic-bezier(.2, 1.4, .4, 1) both;
+  }
+  .title span { display: inline-block; animation: wiggle 3s ease-in-out infinite; }
+  .subtitle { margin-top: 22px; font-size: clamp(16px, 2.4vw, 22px); color: #5a4535; font-weight: 500; }
+  .mascot { font-size: clamp(40px, 8vw, 70px); display: block; margin: 8px auto 0; animation: bounce 2.4s ease-in-out infinite; }
+  .topbar { display: flex; justify-content: center; gap: 8px; margin-top: 18px; }
+  .chip {
+    background: var(--card); border-radius: 999px; padding: 8px 14px; font-weight: 600;
+    box-shadow: 0 4px 0 #dccbb5; transition: transform .1s;
+  }
+  .chip:active { transform: translateY(3px); box-shadow: 0 1px 0 #dccbb5; }
+
+  /* ---------- Sections ---------- */
+  section { margin-top: 46px; }
+  h2 {
+    font-size: clamp(22px, 3.6vw, 34px); font-weight: 700; color: #5a4535;
+    display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+  }
+  h2 .badge {
+    display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 14px;
+    background: var(--card); box-shadow: 0 5px 0 #dccbb5; font-size: 24px; transform: rotate(-6deg);
+  }
+  .lead { color: var(--ink-soft); font-size: clamp(15px, 2vw, 18px); margin-bottom: 18px; }
+
+  /* ---------- Mode switch ---------- */
+  .modes { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .mode {
+    padding: 10px 20px; border-radius: 999px; font-weight: 700; font-size: 17px;
+    background: var(--card); box-shadow: 0 5px 0 #dccbb5; transition: transform .12s, background .2s;
+  }
+  .mode[aria-pressed="true"] { background: var(--yellow); box-shadow: 0 5px 0 var(--yellow-d); }
+  .mode:active { transform: translateY(3px); }
+
+  /* ---------- Speech bubble ---------- */
+  .bubble {
+    position: relative; background: var(--card); border-radius: var(--radius);
+    padding: 18px 22px; min-height: 96px; display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center;
+    box-shadow: 0 8px 0 #dccbb5, 0 16px 30px rgba(120, 70, 40, .15);
+    margin-bottom: 26px; transition: transform .2s;
+  }
+  .bubble::after {
+    content: ""; position: absolute; left: 60px; bottom: -22px;
+    border: 14px solid transparent; border-top-color: var(--card); border-bottom: 0;
+  }
+  .bubble .emoji { font-size: 52px; line-height: 1; animation: pop .4s cubic-bezier(.2, 1.4, .4, 1) both; }
+  .bubble h3 { font-size: clamp(19px, 2.6vw, 26px); font-weight: 700; margin-bottom: 4px; }
+  .bubble p { color: var(--ink-soft); font-size: clamp(15px, 2vw, 18px); }
+  .bubble.flash { animation: flash .5s; }
+  .stars { font-size: 22px; letter-spacing: 2px; }
+
+  /* ---------- Keyboard ---------- */
+  .kb-wrap { position: relative; }
+  .keyboard {
+    --u: clamp(30px, 5.1vw, 52px);
+    display: grid;
+    grid-template-columns: repeat(60, minmax(0, 1fr));
+    grid-auto-rows: var(--u);
+    gap: clamp(3px, .6vw, 7px);
+    padding: clamp(8px, 1.6vw, 18px);
+    background: linear-gradient(#e8e2d6, #d7cfc1);
+    border-radius: clamp(14px, 2.5vw, 26px);
+    box-shadow: 0 12px 0 #b9ae9a, 0 26px 40px rgba(90, 60, 40, .28);
+    user-select: none;
+  }
+  .key {
+    position: relative; min-width: 0; overflow: hidden; padding: 0 1px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-radius: clamp(6px, 1vw, 11px);
+    background: var(--key);
+    box-shadow: 0 4px 0 var(--key-d), inset 0 -2px 0 rgba(0,0,0,.05);
+    font-size: clamp(9px, 1.45vw, 16px); font-weight: 600; color: #4a3d36;
+    transition: transform .08s, box-shadow .08s, background .2s;
+    touch-action: manipulation;
+  }
+  .key .top { font-size: .75em; line-height: 1; color: #7a6a60; }
+  .key .main { line-height: 1.1; }
+  .key.fnrow { font-size: clamp(8px, 1.1vw, 12px); }
+  .key.tiny { font-size: clamp(7px, 1vw, 11px); }
+  .key .icon { font-size: 1.3em; line-height: 1; }
+  .key:hover { transform: translateY(-2px); }
+  .key:active, .key.pressed { transform: translateY(3px); box-shadow: 0 1px 0 var(--key-d); }
+  .key.green   { background: var(--green);   box-shadow: 0 4px 0 var(--green-d); }
+  .key.coral   { background: var(--coral);   box-shadow: 0 4px 0 var(--coral-d); }
+  .key.purple  { background: var(--purple);  box-shadow: 0 4px 0 var(--purple-d); }
+  .key.yellow  { background: var(--yellow);  box-shadow: 0 4px 0 var(--yellow-d); }
+  .key.blue    { background: var(--blue);    box-shadow: 0 4px 0 var(--blue-d); color: #fff; }
+  .key.blue .top { color: #dfe6ff; }
+  .key.magenta { background: var(--magenta); box-shadow: 0 4px 0 var(--magenta-d); color: #fff; }
+  .key.green.pressed, .key.green:active     { box-shadow: 0 1px 0 var(--green-d); }
+  .key.coral.pressed, .key.coral:active     { box-shadow: 0 1px 0 var(--coral-d); }
+  .key.purple.pressed, .key.purple:active   { box-shadow: 0 1px 0 var(--purple-d); }
+  .key.yellow.pressed, .key.yellow:active   { box-shadow: 0 1px 0 var(--yellow-d); }
+  .key.blue.pressed, .key.blue:active       { box-shadow: 0 1px 0 var(--blue-d); }
+  .key.magenta.pressed, .key.magenta:active { box-shadow: 0 1px 0 var(--magenta-d); }
+  .key.correct { animation: correct .7s; outline: 4px solid #3fae86; outline-offset: 2px; }
+  .key.wrong { animation: shake .45s; outline: 4px solid #d2604f; outline-offset: 2px; }
+  .key.hint { animation: glow 1s infinite alternate; }
+  .kb-hint { text-align: center; color: #6a4f42; margin-top: 14px; font-weight: 500; }
+  .kb-hint kbd {
+    font: inherit; background: var(--card); padding: 2px 10px; border-radius: 8px; box-shadow: 0 3px 0 #dccbb5;
+  }
+
+  /* ---------- Quiz ---------- */
+  .quiz-bar {
+    display: none; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    background: var(--card); border-radius: 18px; padding: 12px 18px; margin-bottom: 14px;
+    box-shadow: 0 6px 0 #dccbb5;
+  }
+  .quiz-bar.on { display: flex; }
+  .progress { flex: 1 1 160px; height: 16px; background: #eadfce; border-radius: 999px; overflow: hidden; }
+  .progress > div { height: 100%; width: 0; background: linear-gradient(90deg, #78d9b0, #f4c04b); transition: width .4s; border-radius: 999px; }
+  .score { font-weight: 700; font-size: 18px; }
+
+  /* ---------- Cards ---------- */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 20px; }
+  .card {
+    background: var(--card); border-radius: var(--radius); padding: 20px;
+    box-shadow: 0 8px 0 #dccbb5, 0 16px 30px rgba(120, 70, 40, .12);
+    display: flex; flex-direction: column; gap: 12px;
+    transition: transform .2s;
+  }
+  .card:hover { transform: translateY(-4px) rotate(-.4deg); }
+  .card .head { display: flex; align-items: center; gap: 12px; }
+  .card .kicon {
+    width: 58px; height: 58px; border-radius: 16px; display: grid; place-items: center;
+    font-size: 26px; font-weight: 700; flex: none;
+  }
+  .card h3 { font-size: 21px; font-weight: 700; }
+  .card .what { color: var(--ink-soft); font-size: 16px; }
+  .card .demo {
+    background: #fff; border-radius: 16px; padding: 12px; border: 3px dashed #eadfce;
+    display: flex; flex-direction: column; gap: 10px; margin-top: auto;
+  }
+  .demo .label { font-weight: 700; font-size: 14px; color: #a0806f; text-transform: uppercase; letter-spacing: 1px; }
+  .demo .out {
+    min-height: 44px; overflow-wrap: anywhere; display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+    font-size: 22px; font-weight: 600; word-break: break-word;
+  }
+  .demo .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .btn {
+    padding: 9px 16px; border-radius: 12px; font-weight: 700; font-size: 16px;
+    background: var(--key); box-shadow: 0 4px 0 var(--key-d); transition: transform .08s, box-shadow .08s;
+  }
+  .btn:active, .btn.down { transform: translateY(3px); box-shadow: 0 1px 0 var(--key-d); }
+  .btn.green   { background: var(--green);   box-shadow: 0 4px 0 var(--green-d); }
+  .btn.coral   { background: var(--coral);   box-shadow: 0 4px 0 var(--coral-d); }
+  .btn.purple  { background: var(--purple);  box-shadow: 0 4px 0 var(--purple-d); }
+  .btn.yellow  { background: var(--yellow);  box-shadow: 0 4px 0 var(--yellow-d); }
+  .btn.blue    { background: var(--blue);    box-shadow: 0 4px 0 var(--blue-d); color: #fff; }
+  .btn.magenta { background: var(--magenta); box-shadow: 0 4px 0 var(--magenta-d); color: #fff; }
+  .btn.green:active, .btn.green.down     { box-shadow: 0 1px 0 var(--green-d); }
+  .btn.coral:active, .btn.coral.down     { box-shadow: 0 1px 0 var(--coral-d); }
+  .btn.purple:active, .btn.purple.down   { box-shadow: 0 1px 0 var(--purple-d); }
+  .btn.yellow:active, .btn.yellow.down   { box-shadow: 0 1px 0 var(--yellow-d); }
+  .btn.blue:active, .btn.blue.down       { box-shadow: 0 1px 0 var(--blue-d); }
+  .btn.magenta:active, .btn.magenta.down { box-shadow: 0 1px 0 var(--magenta-d); }
+  .btn.small { padding: 6px 12px; font-size: 14px; }
+  .toggle { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; }
+  .toggle .sw { width: 54px; height: 30px; border-radius: 999px; background: #d9cfbf; position: relative; transition: background .2s; }
+  .toggle .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: left .2s; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+  .toggle[aria-pressed="true"] .sw { background: var(--green-d); }
+  .toggle[aria-pressed="true"] .sw::after { left: 27px; }
+  .space-vis { display: inline-block; min-width: 14px; height: 26px; border-bottom: 4px solid var(--magenta); margin: 0 2px; }
+  .chat { display: flex; flex-direction: column; gap: 6px; min-height: 40px; }
+  .chat .msg { align-self: flex-end; background: var(--yellow); padding: 6px 12px; border-radius: 14px 14px 4px 14px; font-weight: 600; animation: pop .3s cubic-bezier(.2,1.4,.4,1) both; }
+  .basket { display: flex; gap: 6px; min-height: 44px; align-items: center; background: #fff8e6; border-radius: 12px; padding: 6px 10px; font-size: 26px; flex-wrap: wrap; }
+  .basket.empty::before { content: "boş sepet"; font-size: 14px; color: #b9a48f; }
+  .fruit { cursor: pointer; transition: transform .15s; }
+  .fruit.sel { transform: scale(1.3); filter: drop-shadow(0 0 6px #f4c04b); }
+  input.type {
+    font: inherit; font-size: 20px; padding: 8px 12px; border-radius: 12px; border: 3px solid #eadfce; width: 100%;
+    background: #fff; color: var(--ink);
+  }
+  input.type:focus { outline: none; border-color: var(--green-d); }
+
+  /* ---------- Shortcuts ---------- */
+  .shortcuts { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+  .sc { background: var(--card); border-radius: 18px; padding: 16px; box-shadow: 0 6px 0 #dccbb5; display: flex; gap: 12px; align-items: center; }
+  .sc .combo { display: flex; gap: 4px; align-items: center; font-weight: 700; flex: none; }
+  .sc kbd { font: inherit; font-weight: 700; background: var(--blue); color: #fff; padding: 6px 10px; border-radius: 9px; box-shadow: 0 3px 0 var(--blue-d); }
+  .sc kbd.l { background: var(--key); color: var(--ink); box-shadow: 0 3px 0 var(--key-d); }
+  .sc p { font-size: 15px; color: var(--ink-soft); }
+  .sc b { color: var(--ink); }
+
+  footer { text-align: center; margin-top: 50px; color: #6a4f42; font-weight: 500; }
+
+  /* ---------- Confetti ---------- */
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+
+  /* ---------- Animations ---------- */
+  @keyframes pop { from { transform: scale(.6) rotate(-6deg); opacity: 0; } to { transform: scale(1) rotate(-1.5deg); opacity: 1; } }
+  .bubble .emoji { animation-name: popEmoji; }
+  @keyframes popEmoji { from { transform: scale(.4); } 60% { transform: scale(1.25); } to { transform: scale(1); } }
+  @keyframes wiggle { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(6deg); } }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes flash { 0% { transform: scale(1); } 40% { transform: scale(1.03); } 100% { transform: scale(1); } }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+  @keyframes correct { 0% { transform: scale(1); } 40% { transform: scale(1.18) rotate(-4deg); } 100% { transform: scale(1); } }
+  @keyframes glow { from { filter: brightness(1); } to { filter: brightness(1.25) drop-shadow(0 0 8px #fff3b0); } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+  @media (max-width: 560px) {
+    .key.tiny .main { display: none; }
+    .key.tiny .top { font-size: 1.25em; color: inherit; }
+    .bubble { grid-template-columns: 1fr; text-align: center; }
+    .bubble::after { left: 50%; margin-left: -14px; }
+  }
+</style>
+</head>
+<body>
+<div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<canvas id="confetti"></canvas>
+
+<main>
+  <header>
+    <h1 class="title">Mac Klavye <span>⌨️</span> Tuşları ve İşlevleri</h1>
+    <span class="mascot" aria-hidden="true">🐱</span>
+    <p class="subtitle">Tuşlara dokun, ne işe yaradıklarını öğren, sonra oyunla kendini dene! 🎈</p>
+    <div class="topbar">
+      <button class="chip" id="soundBtn" aria-pressed="true">🔊 Ses açık</button>
+    </div>
+  </header>
+
+  <!-- ===================== KEYBOARD ===================== -->
+  <section id="klavye">
+    <h2><span class="badge">👆</span> Sihirli Klavye</h2>
+    <p class="lead">Ekrandaki tuşlara tıkla ya da <b>kendi klavyende</b> bir tuşa bas. Renkli tuşlar en önemlileri!</p>
+
+    <div class="modes" role="group" aria-label="Mod seçimi">
+      <button class="mode" id="modeLearn" aria-pressed="true">📚 Öğren</button>
+      <button class="mode" id="modeQuiz" aria-pressed="false">🎮 Hangi Tuş? Oyunu</button>
+    </div>
+
+    <div class="quiz-bar" id="quizBar">
+      <span id="quizStep" class="score">Soru 1 / 10</span>
+      <div class="progress"><div id="quizProg"></div></div>
+      <span class="score" id="quizScore">⭐ 0</span>
+      <button class="btn small yellow" id="quizRestart">🔄 Baştan</button>
+    </div>
+
+    <div class="bubble" id="bubble" aria-live="polite">
+      <div class="emoji" id="bEmoji">👋</div>
+      <div>
+        <h3 id="bTitle">Merhaba!</h3>
+        <p id="bText">Bir tuşa tıkla, sana ne işe yaradığını anlatayım.</p>
+      </div>
+    </div>
+
+    <div class="kb-wrap">
+      <div class="keyboard" id="keyboard" role="group" aria-label="Sanal Mac klavyesi"></div>
+    </div>
+    <p class="kb-hint">İpucu: Gerçek klavyende <kbd>A</kbd> tuşuna bas, ekranda ışıldadığını gör! ✨</p>
+  </section>
+
+  <!-- ===================== SUPER KEYS ===================== -->
+  <section id="super">
+    <h2><span class="badge">🦸</span> Süper Tuşlar</h2>
+    <p class="lead">Bu altı tuş klavyenin kahramanları. Her birini hemen burada deneyebilirsin!</p>
+
+    <div class="cards">
+
+      <!-- Caps Lock -->
+      <article class="card">
+        <div class="head">
+          <div class="kicon" style="background:var(--green)">⇪</div>
+          <div><h3>Caps Lock</h3><div class="what">Büyük Harf Kilidi</div></div>
+        </div>
+        <p>Bastığında <b>tüm harfler BÜYÜK</b> yazılır. Kapatmak için tekrar bas. Bağırıyor gibi görünür, dikkatli kullan! 😄</p>
+        <div class="demo">
+          <div class="label">Dene!</div>
+          <button class="toggle" id="capsToggle" aria-pressed="false"><span class="sw"></span> Caps Lock: <span id="capsState">Kapalı</span></button>
+          <input class="type" id="capsInput" value="merhaba dünya" aria-label="Yazı" />
+          <div class="out" id="capsOut">merhaba dünya</div>
+        </div>
+      </article>
+
+      <!-- Silme -->
+      <article class="card">
+        <div class="head">
+          <div class="kicon" style="background:var(--purple)">⌫</div>
+          <div><h3>Silme Tuşu</h3><div class="what">Delete / Backspace</div></div>
+        </div>
+        <p>İmlecin <b>solundaki</b> karakteri siler. Yanlış yazdıysan korkma, silgi burada! 🧽</p>
+        <div class="demo">
+          <div class="label">Dene!</div>
+          <div class="out" id="delOut"></div>
+          <div class="row">
+            <button class="btn purple" id="delBtn">⌫ Sil</button>
+            <button class="btn small" id="delReset">🔄 Yeniden yaz</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Shift -->
+      <article class="card">
+        <div class="head">
+          <div class="kicon" style="background:var(--coral)">⇧</div>
+          <div><h3>Shift Tuşu</h3><div class="what">Harf ve Simge Değiştirme</div></div>
+        </div>
+        <p><b>Basılı tuttuğunda</b> harf büyük yazılır ya da tuşun üstündeki simge çıkar. Örneğin 3 tuşu → ^ olur!</p>
+        <div class="demo">
+          <div class="label">Basılı tut!</div>
+          <div class="out" id="shiftOut">a &nbsp; 3 &nbsp; 8 &nbsp; ,</div>
+          <button class="btn coral" id="shiftBtn">⇧ Shift'e basılı tut</button>
+        </div>
+      </article>
+
+      <!-- Command -->
+      <article class="card">
+        <div class="head">
+          <div class="kicon" style="background:var(--blue);color:#fff">⌘</div>
+          <div><h3>Komut Tuşu</h3><div class="what">Command</div></div>
+        </div>
+        <p>Mac'in <b>en önemli</b> tuşu! Kopyala, yapıştır gibi kısayolları çalıştırır. Windows'taki Ctrl gibidir.</p>
+        <div class="demo">
+          <div class="label">Meyveyi seç, kopyala, yapıştır!</div>
+          <div class="basket" id="fruitSrc"><span class="fruit">🍎</span><span class="fruit">🍌</span><span class="fruit">🍓</span><span class="fruit">🍇</span></div>
+          <div class="row">
+            <button class="btn blue" id="copyBtn">⌘ C Kopyala</button>
+            <button class="btn blue" id="pasteBtn">⌘ V Yapıştır</button>
+            <button class="btn small" id="basketClear">🗑️</button>
+          </div>
+          <div class="basket empty" id="fruitDst"></div>
+        </div>
+      </article>
+
+      <!-- Boşluk -->
+      <article class="card">
+        <div class="head">
+          <div class="kicon" style="background:var(--magenta);color:#fff">␣</div>
+          <div><h3>Boşluk Tuşu</h3><div class="what">Space</div></div>
+        </div>
+        <p>Kelimeler arasına <b>boşluk</b> bırakır. En uzun tuş odur, gözden kaçmaz! 📏</p>
+        <div class="demo">
+          <div class="label">Kelimeleri ayır!</div>
+          <div class="out" id="spaceOut"></div>
+          <div class="row">
+            <button class="btn magenta" id="spaceBtn">␣ Boşluk</button>
+            <button class="btn small" id="spaceReset">🔄</button>
+          </div>
+          <div id="spaceMsg" style="font-weight:700;color:var(--magenta-d)"></div>
+        </div>
+      </article>
+
+      <!-- Enter -->
+      <article class="card">
+        <div class="head">
+          <div class="kicon" style="background:var(--yellow)">↵</div>
+          <div><h3>Giriş / Onay Tuşu</h3><div class="what">Enter / Return</div></div>
+        </div>
+        <p>Bir <b>alt satıra</b> geçmeni ya da seçili işlemi <b>onaylamanı</b> sağlar. "Tamam, gönder!" demek gibi. 🚀</p>
+        <div class="demo">
+          <div class="label">Mesaj yaz, Enter ile gönder!</div>
+          <div class="chat" id="chat"></div>
+          <div class="row" style="flex-wrap:nowrap">
+            <input class="type" id="chatInput" placeholder="Merhaba!" aria-label="Mesaj" />
+            <button class="btn yellow" id="enterBtn">↵</button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ===================== SHORTCUTS ===================== -->
+  <section id="kisayol">
+    <h2><span class="badge">⚡</span> Kısayol Köşesi</h2>
+    <p class="lead">⌘ Komut tuşunu basılı tutup bir harfe basarsan sihir olur!</p>
+    <div class="shortcuts">
+      <div class="sc"><div class="combo"><kbd>⌘</kbd>+<kbd class="l">C</kbd></div><p><b>Kopyala</b> — seçtiğini fotokopi gibi kopyalar.</p></div>
+      <div class="sc"><div class="combo"><kbd>⌘</kbd>+<kbd class="l">V</kbd></div><p><b>Yapıştır</b> — kopyaladığını istediğin yere koyar.</p></div>
+      <div class="sc"><div class="combo"><kbd>⌘</kbd>+<kbd class="l">Z</kbd></div><p><b>Geri al</b> — "Ay, yanlış yaptım!" dediğinde kurtarır.</p></div>
+      <div class="sc"><div class="combo"><kbd>⌘</kbd>+<kbd class="l">S</kbd></div><p><b>Kaydet</b> — çalışmanı saklar, kaybolmaz.</p></div>
+      <div class="sc"><div class="combo"><kbd>⌘</kbd>+<kbd class="l">A</kbd></div><p><b>Hepsini seç</b> — her şeyi bir anda seçer.</p></div>
+      <div class="sc"><div class="combo"><kbd>⌘</kbd>+<kbd class="l">Q</kbd></div><p><b>Çıkış</b> — programı kapatır.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Tuşları öğrendin, artık bir klavye kahramanısın! 🏆</p>
+  </footer>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ================= SOUND ================= */
+  let audio = null, soundOn = true;
+  const soundBtn = document.getElementById('soundBtn');
+  function blip(freq = 600, dur = .08, type = 'sine', vol = .15) {
+    if (!soundOn) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === 'suspended') audio.resume();
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.type = type; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol, audio.currentTime);
+      g.gain.exponentialRampToValueAtTime(.0001, audio.currentTime + dur);
+      o.connect(g).connect(audio.destination);
+      o.start(); o.stop(audio.currentTime + dur);
+    } catch (e) { /* ses yoksa sorun değil */ }
+  }
+  const sfx = {
+    key: () => blip(520 + Math.random() * 200, .07, 'triangle'),
+    good: () => { blip(660, .12, 'sine', .18); setTimeout(() => blip(880, .14, 'sine', .18), 110); setTimeout(() => blip(1320, .2, 'sine', .16), 220); },
+    bad: () => { blip(220, .18, 'sawtooth', .08); },
+    win: () => [523, 659, 784, 1047, 1319].forEach((f, i) => setTimeout(() => blip(f, .25, 'sine', .16), i * 120)),
+  };
+  soundBtn.addEventListener('click', () => {
+    soundOn = !soundOn;
+    soundBtn.setAttribute('aria-pressed', soundOn);
+    soundBtn.textContent = soundOn ? '🔊 Ses açık' : '🔇 Ses kapalı';
+    if (soundOn) sfx.key();
+  });
+
+  /* ================= CONFETTI ================= */
+  const cv = document.getElementById('confetti'), cx = cv.getContext('2d');
+  let parts = [], raf = 0;
+  function resize() { cv.width = innerWidth; cv.height = innerHeight; }
+  addEventListener('resize', resize); resize();
+  const COLORS = ['#78d9b0', '#f7907d', '#c8a8e8', '#f4c04b', '#4d6fd0', '#b64a86', '#fff'];
+  function confetti(n = 80, x = innerWidth / 2, y = innerHeight / 2) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, s = 4 + Math.random() * 8;
+      parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 6, r: 4 + Math.random() * 6,
+        c: COLORS[i % COLORS.length], rot: Math.random() * 6, vr: (Math.random() - .5) * .3, life: 90 + Math.random() * 40 });
+    }
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+  function tick() {
+    cx.clearRect(0, 0, cv.width, cv.height);
+    parts = parts.filter(p => p.life-- > 0 && p.y < cv.height + 20);
+    for (const p of parts) {
+      p.vy += .25; p.x += p.vx; p.y += p.vy; p.vx *= .99; p.rot += p.vr;
+      cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot); cx.fillStyle = p.c;
+      cx.globalAlpha = Math.min(1, p.life / 30);
+      cx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * .6); cx.restore();
+    }
+    raf = parts.length ? requestAnimationFrame(tick) : 0;
+  }
+
+  /* ================= KEY DATA ================= */
+  // w = genişlik birimi (60 birimlik satır), t = ana yazı, s = üst simge, cls = renk, code = fiziksel tuş kodları
+  const FN = [
+    ['f1', '🔅', 'Parlaklığı azaltır. Ekran biraz kararır.'],
+    ['f2', '🔆', 'Parlaklığı artırır. Ekran ışıl ışıl olur!'],
+    ['f3', '🗂️', 'Mission Control: açık tüm pencereleri kuş bakışı gösterir.'],
+    ['f4', '🔍', 'Spotlight: Mac\'te bir şey aramak için büyüteç!'],
+    ['f5', '🎤', 'Dikte: konuş, Mac senin yerine yazsın.'],
+    ['f6', '🌙', 'Rahatsız Etme: bildirimleri uyutur.'],
+    ['f7', '⏮', 'Önceki şarkıya geçer.'],
+    ['f8', '⏯', 'Müziği başlatır ya da durdurur.'],
+    ['f9', '⏭', 'Sonraki şarkıya geçer.'],
+    ['f10', '🔇', 'Sesi tamamen kapatır. Şşşt!'],
+    ['f11', '🔉', 'Sesi kısar.'],
+    ['f12', '🔊', 'Sesi açar. Dikkat, komşular!'],
+  ];
+  const ROWS = [
+    [ { id: 'esc', t: 'esc', w: 6, cls: 'fnrow', code: ['Escape'] },
+      ...FN.map(([id, ic, d]) => ({ id, ic, t: id.toUpperCase(), w: 4, cls: 'fnrow', code: [id.toUpperCase()], desc: d })),
+      { id: 'lock', ic: '🔒', w: 6, cls: 'fnrow', code: [] } ],
+    [ { id: 'quote', s: 'é', t: '"', w: 4, code: ['Backquote'] },
+      { id: 'd1', s: '!', t: '1', w: 4, digit: true, code: ['Digit1'] }, { id: 'd2', s: "'", t: '2', w: 4, digit: true, code: ['Digit2'] },
+      { id: 'd3', s: '^', t: '3', w: 4, digit: true, code: ['Digit3'] }, { id: 'd4', s: '+', t: '4', w: 4, digit: true, code: ['Digit4'] },
+      { id: 'd5', s: '%', t: '5', w: 4, digit: true, code: ['Digit5'] }, { id: 'd6', s: '&', t: '6', w: 4, digit: true, code: ['Digit6'] },
+      { id: 'd7', s: '/', t: '7', w: 4, digit: true, code: ['Digit7'] }, { id: 'd8', s: '(', t: '8', w: 4, digit: true, code: ['Digit8'] },
+      { id: 'd9', s: ')', t: '9', w: 4, digit: true, code: ['Digit9'] }, { id: 'd0', s: '=', t: '0', w: 4, digit: true, code: ['Digit0'] },
+      { id: 'star', s: '?', t: '*', w: 4, code: ['Minus'] }, { id: 'minus', s: '_', t: '-', w: 4, code: ['Equal'] },
+      { id: 'delete', t: '⌫', w: 8, cls: 'purple', code: ['Backspace', 'Delete'] } ],
+    [ { id: 'tab', t: '⇥', w: 6, code: ['Tab'] },
+      ...'QWERTYUIOPĞÜ'.split('').map(ch => ({ id: 'l' + ch, t: ch, w: 4, letter: true })),
+      { id: 'enter', t: '↵', w: 6, cls: 'yellow', rows: 2, code: ['Enter', 'NumpadEnter'] } ],
+    [ { id: 'caps', t: '⇪', w: 6, cls: 'green', code: ['CapsLock'] },
+      ...'ASDFGHJKLŞİ'.split('').map(ch => ({ id: 'l' + ch, t: ch, w: 4, letter: true })),
+      { id: 'comma', s: ';', t: ',', w: 4, code: ['Backslash'] } ],
+    [ { id: 'shiftL', t: '⇧', w: 5, cls: 'coral', code: ['ShiftLeft'] },
+      { id: 'lt', s: '>', t: '<', w: 4, code: ['IntlBackslash'] },
+      ...'ZXCVBNMÖÇ'.split('').map(ch => ({ id: 'l' + ch, t: ch, w: 4, letter: true })),
+      { id: 'dot', s: ':', t: '.', w: 4, code: ['Slash'] },
+      { id: 'shiftR', t: '⇧', w: 11, cls: 'coral', code: ['ShiftRight'] } ],
+    [ { id: 'fn', t: '🌐', w: 4, cls: 'tiny', code: ['Fn'] },
+      { id: 'control', s: '⌃', t: 'control', w: 4, cls: 'tiny', code: ['ControlLeft', 'ControlRight'] },
+      { id: 'optionL', s: '⌥', t: 'option', w: 4, cls: 'tiny', code: ['AltLeft'] },
+      { id: 'cmdL', s: '⌘', t: 'command', w: 5, cls: 'blue tiny', code: ['MetaLeft', 'OSLeft'] },
+      { id: 'space', t: '', w: 22, cls: 'magenta', code: ['Space'] },
+      { id: 'cmdR', s: '⌘', t: 'command', w: 5, cls: 'blue tiny', code: ['MetaRight', 'OSRight'] },
+      { id: 'optionR', s: '⌥', t: 'option', w: 4, cls: 'tiny', code: ['AltRight'] },
+      { id: 'left', t: '◀', w: 4, code: ['ArrowLeft'] },
+      { id: 'updown', t: '▲▼', w: 4, cls: 'tiny', code: ['ArrowUp', 'ArrowDown'] },
+      { id: 'right', t: '▶', w: 4, code: ['ArrowRight'] } ],
+  ];
+
+  // Türkçe harflerin fiziksel klavyedeki yerleri (Türkçe Q düzeni)
+  const TR_POS = { 'Ğ': 'BracketLeft', 'Ü': 'BracketRight', 'Ş': 'Semicolon', 'İ': 'Quote', 'Ö': 'Comma', 'Ç': 'Period' };
+
+  const INFO = {
+    esc:     ['🚪', 'Escape (Kaçış) Tuşu', 'Bir pencereyi kapatmak ya da "vazgeçtim!" demek için kullanılır. Köşedeki kaçış kapısı!'],
+    lock:    ['🔒', 'Kilit / Touch ID', 'Parmak izinle Mac\'i açar ya da kilitler. Şifre gibi ama parmağınla!'],
+    quote:   ['💬', 'Tırnak Tuşu', 'Konuşma tırnağı " yazar. Shift ile é çıkar.'],
+    star:    ['⭐', 'Yıldız Tuşu', 'Çarpma işareti * yazar. Shift ile soru işareti ? çıkar.'],
+    minus:   ['➖', 'Eksi Tuşu', 'Eksi - yazar. Shift ile alt çizgi _ çıkar.'],
+    comma:   ['✏️', 'Virgül Tuşu', 'Virgül , yazar. Shift ile noktalı virgül ; çıkar.'],
+    dot:     ['🔴', 'Nokta Tuşu', 'Cümlenin sonuna nokta . koyar. Shift ile iki nokta : çıkar.'],
+    lt:      ['↔️', 'Küçüktür Tuşu', '< ve Shift ile > işaretlerini yazar. Timsah ağzı gibi!'],
+    delete:  ['🧽', 'Silme Tuşu', 'İmlecin solundaki karakteri siler. Yanlış yazdıysan silgi burada!'],
+    tab:     ['➡️', 'Tab (Sekme) Tuşu', 'İmleci büyük bir adım ileri zıplatır. Formlarda bir kutudan diğerine geçer.'],
+    enter:   ['🚀', 'Giriş / Onay Tuşu', 'Bir alt satıra geçmeni ya da seçili işlemi onaylamanı sağlar. "Tamam, gönder!"'],
+    caps:    ['📢', 'Caps Lock — Büyük Harf Kilidi', 'Bastığında tüm harfler BÜYÜK yazılır. Kapatmak için tekrar bas.'],
+    shiftL:  ['⬆️', 'Shift Tuşu', 'Basılı tuttuğunda harfi büyük yazar ya da tuşun üstündeki simgeyi çıkarır.'],
+    shiftR:  ['⬆️', 'Shift Tuşu (sağ)', 'Soldakiyle aynı iş! Basılı tuttuğunda harf büyük yazılır ya da üst simge çıkar.'],
+    fn:      ['🌐', 'Fn / Dünya Tuşu', 'Emoji klavyesini açar ve F tuşlarına ekstra görevler verir.'],
+    control: ['🎛️', 'Control Tuşu', 'Bazı özel kısayollar için kullanılır. Örneğin control tıklama, sağ tık gibi menü açar.'],
+    optionL: ['🎨', 'Option Tuşu', 'Gizli karakterler çıkarır! Basılı tutup harflere basarak özel simgeler yazabilirsin.'],
+    optionR: ['🎨', 'Option Tuşu (sağ)', 'Soldakiyle aynı: gizli karakterler ve özel simgeler için.'],
+    cmdL:    ['🪄', 'Komut Tuşu ⌘', 'Mac\'in en önemli tuşu! Kopyala, yapıştır gibi kısayolları çalıştırır. Windows\'un Ctrl\'si gibi.'],
+    cmdR:    ['🪄', 'Komut Tuşu ⌘ (sağ)', 'Soldakinin ikizi. İki elle de kısayol yapabilirsin!'],
+    space:   ['📏', 'Boşluk Tuşu', 'Kelimeler arasında boşluk bırakır. Klavyenin en uzun tuşu!'],
+    left:    ['◀️', 'Sol Ok', 'İmleci sola götürür. Oyunlarda karakteri sola yürütür!'],
+    right:   ['▶️', 'Sağ Ok', 'İmleci sağa götürür. Oyunlarda karakteri sağa yürütür!'],
+    updown:  ['🔼', 'Yukarı / Aşağı Ok', 'İmleci bir satır yukarı ya da aşağı taşır. Listelerde gezinmek için süper!'],
+  };
+  function infoFor(k) {
+    if (INFO[k.id]) return INFO[k.id];
+    if (k.desc) return ['🎛️', k.t + ' Tuşu', k.desc];
+    if (k.letter) { const ch = k.t; return ['🔤', ch + ' Harfi', `Bu bir harf tuşu. Bastığında ekrana "${ch.toLocaleLowerCase('tr')}" yazılır. Shift ile büyük "${ch}" olur!`]; }
+    if (k.digit) return ['🔢', k.t + ' Rakamı', `Rakam tuşu: ${k.t}. Shift ile basarsan ${k.s} işareti çıkar!`];
+    return ['⌨️', 'Tuş', 'Bu da bir klavye tuşu.'];
+  }
+
+  /* ================= BUILD KEYBOARD ================= */
+  const kb = document.getElementById('keyboard');
+  const keyEls = {}, byCode = {}, byChar = {}, ALL = [];
+  ROWS.forEach((row, r) => row.forEach(k => {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'key ' + (k.cls || '');
+    el.style.gridColumn = 'span ' + k.w;
+    el.style.gridRow = k.rows ? `${r + 1} / span ${k.rows}` : String(r + 1);
+    el.dataset.id = k.id;
+    const info = infoFor(k);
+    el.setAttribute('aria-label', info[1]);
+    if (k.ic) el.innerHTML = `<span class="icon">${k.ic}</span>${k.t ? `<span class="top">${k.t}</span>` : ''}`;
+    else el.innerHTML = `${k.s ? `<span class="top">${k.s}</span>` : ''}<span class="main">${k.t}</span>`;
+    kb.appendChild(el);
+    keyEls[k.id] = el; ALL.push(k);
+    (k.code || []).forEach(c => byCode[c] = k.id);
+    if (k.letter) {
+      byChar[k.t.toLowerCase()] = k.id; byChar[k.t] = k.id;
+      byCode[TR_POS[k.t] || ('Key' + k.t)] = k.id;
+    }
+    if (k.digit) byChar[k.t] = k.id;
+    el.addEventListener('pointerdown', () => press(k.id, true));
+  }));
+  // ı / i karışıklığı: Türkçe klavyede "i" harfi İ tuşunda, "ı" harfi I tuşunda
+  byChar['i'] = 'lİ'; byChar['ı'] = 'lI'; byChar['I'] = 'lI';
+
+  const bubble = document.getElementById('bubble'), bEmoji = document.getElementById('bEmoji'),
+        bTitle = document.getElementById('bTitle'), bText = document.getElementById('bText');
+  function say(emoji, title, text) {
+    bEmoji.textContent = emoji; bTitle.textContent = title; bText.innerHTML = text;
+    bEmoji.style.animation = 'none'; void bEmoji.offsetWidth; bEmoji.style.animation = '';
+    bubble.classList.remove('flash'); void bubble.offsetWidth; bubble.classList.add('flash');
+  }
+  function light(id, ms = 160) {
+    const el = keyEls[id]; if (!el) return;
+    el.classList.add('pressed'); setTimeout(() => el.classList.remove('pressed'), ms);
+  }
+
+  let mode = 'learn';
+  function press(id, fromClick) {
+    const k = ALL.find(x => x.id === id); if (!k) return;
+    light(id);
+    if (mode === 'quiz') { answer(id); return; }
+    sfx.key();
+    const [e, t, d] = infoFor(k);
+    say(e, t, d + (fromClick ? '' : ' <b>Gerçek klavyende bastın, bravo! 👏</b>'));
+  }
+
+  /* ================= PHYSICAL KEYBOARD ================= */
+  addEventListener('keydown', e => {
+    if (e.repeat) return;
+    const inField = /INPUT|TEXTAREA/.test(document.activeElement?.tagName);
+    let id = byCode[e.code];
+    if (!id && e.key && e.key.length === 1) id = byChar[e.key] || byChar[e.key.toLowerCase()];
+    if (!id) return;
+    if (inField) { light(id); return; }            // yazı kutusunda normal yazsın, sadece ışıldasın
+    if (['Tab', 'Space', 'ArrowUp', 'ArrowDown'].includes(e.code)) e.preventDefault();
+    if (e.metaKey && e.code !== 'MetaLeft' && e.code !== 'MetaRight') return; // ⌘ kısayollarına karışma
+    press(id, false);
+  });
+
+  /* ================= MODES & QUIZ ================= */
+  const modeLearn = document.getElementById('modeLearn'), modeQuiz = document.getElementById('modeQuiz'),
+        quizBar = document.getElementById('quizBar'), quizStep = document.getElementById('quizStep'),
+        quizProg = document.getElementById('quizProg'), quizScore = document.getElementById('quizScore');
+  const QUESTIONS = [
+    ['📏', 'Kelimeler arasına boşluk koyan tuş hangisi?', ['space']],
+    ['🧽', 'Yanlış yazdığın harfi silmek için hangi tuşa basarsın?', ['delete']],
+    ['🚀', 'Alt satıra geçmek ya da onaylamak için hangi tuşa basarsın?', ['enter']],
+    ['📢', 'TÜM HARFLERİ BÜYÜK yazmak için hangi kilidi açarsın?', ['caps']],
+    ['⬆️', 'Basılı tutarken harfi bir kere büyük yazan tuş hangisi?', ['shiftL', 'shiftR']],
+    ['🪄', 'Kopyala-yapıştır kısayollarındaki Mac\'in en önemli tuşu hangisi?', ['cmdL', 'cmdR']],
+    ['🔤', 'Adının ilk harfi "A" olsun. A harfine bas!', ['lA']],
+    ['🔉', 'Müzik çok yüksek! Sesi kısan tuşa bas.', ['f11']],
+    ['🚪', 'Bir pencereden kaçmak, vazgeçmek için köşedeki tuş hangisi?', ['esc']],
+    ['◀️', 'Oyundaki karakteri SOLA yürüten ok tuşuna bas!', ['left']],
+  ];
+  let qi = 0, score = 0, locked = false, tries = 0;
+  function setMode(m) {
+    mode = m;
+    modeLearn.setAttribute('aria-pressed', m === 'learn');
+    modeQuiz.setAttribute('aria-pressed', m === 'quiz');
+    quizBar.classList.toggle('on', m === 'quiz');
+    Object.values(keyEls).forEach(el => el.classList.remove('hint', 'correct', 'wrong'));
+    if (m === 'quiz') startQuiz();
+    else say('📚', 'Öğrenme modu', 'Bir tuşa tıkla, sana ne işe yaradığını anlatayım.');
+  }
+  function startQuiz() { qi = 0; score = 0; ask(); }
+  function ask() {
+    locked = false; tries = 0;
+    Object.values(keyEls).forEach(el => el.classList.remove('hint', 'correct', 'wrong'));
+    if (qi >= QUESTIONS.length) {
+      const stars = score >= 9 ? '⭐⭐⭐' : score >= 6 ? '⭐⭐' : '⭐';
+      say('🏆', `Oyun bitti! ${stars}`, `${QUESTIONS.length} sorudan <b>${score}</b> tanesini ilk denemede bildin. ${score >= 9 ? 'Sen bir klavye şampiyonusun!' : 'Harika gidiyorsun, bir daha oyna ve rekor kır!'}`);
+      quizStep.textContent = 'Bitti!'; quizProg.style.width = '100%';
+      sfx.win(); confetti(220, innerWidth / 2, innerHeight / 3);
+      return;
+    }
+    const [e, q] = QUESTIONS[qi];
+    quizStep.textContent = `Soru ${qi + 1} / ${QUESTIONS.length}`;
+    quizProg.style.width = (qi / QUESTIONS.length * 100) + '%';
+    quizScore.textContent = `⭐ ${score}`;
+    say(e, `Soru ${qi + 1}`, q);
+  }
+  function answer(id) {
+    if (locked || qi >= QUESTIONS.length) return;
+    const ok = QUESTIONS[qi][2].includes(id);
+    const el = keyEls[id];
+    if (ok) {
+      locked = true; if (tries === 0) score++;
+      quizScore.textContent = `⭐ ${score}`;
+      el.classList.remove('wrong'); el.classList.add('correct');
+      sfx.good();
+      const r = el.getBoundingClientRect(); confetti(60, r.left + r.width / 2, r.top);
+      say('🎉', ['Süpersin!', 'Bravo!', 'Harikasın!', 'Tam isabet!'][qi % 4], 'Doğru tuş! Sıradaki soruya geçiyoruz...');
+      setTimeout(() => { qi++; ask(); }, 1400);
+    } else {
+      tries++; sfx.bad();
+      el.classList.add('wrong'); setTimeout(() => el.classList.remove('wrong'), 500);
+      const hint = tries >= 2;
+      if (hint) QUESTIONS[qi][2].forEach(t => keyEls[t].classList.add('hint'));
+      say('🤔', 'Tekrar dene!', hint ? 'Parlayan tuşa bak, o sana el sallıyor! ✨' : 'O değil. Bir kez daha düşün, yapabilirsin!');
+    }
+  }
+  modeLearn.addEventListener('click', () => setMode('learn'));
+  modeQuiz.addEventListener('click', () => setMode('quiz'));
+  document.getElementById('quizRestart').addEventListener('click', startQuiz);
+
+  /* ================= DEMOS ================= */
+  // Caps Lock
+  const capsToggle = document.getElementById('capsToggle'), capsInput = document.getElementById('capsInput'),
+        capsOut = document.getElementById('capsOut'), capsState = document.getElementById('capsState');
+  let caps = false;
+  function renderCaps() {
+    const v = capsInput.value || 'merhaba dünya';
+    capsOut.textContent = caps ? v.toLocaleUpperCase('tr') : v;
+    capsState.textContent = caps ? 'Açık' : 'Kapalı';
+    capsToggle.setAttribute('aria-pressed', caps);
+  }
+  capsToggle.addEventListener('click', () => { caps = !caps; sfx.key(); light('caps', 300); renderCaps(); });
+  capsInput.addEventListener('input', renderCaps);
+  renderCaps();
+
+  // Silme
+  const WORD = 'ELMAA';
+  const delOut = document.getElementById('delOut');
+  let delWord = WORD;
+  function renderDel() {
+    delOut.textContent = delWord + '|';
+    if (delWord === 'ELMA') { delOut.textContent += ' ✅ Şimdi doğru!'; sfx.good(); confetti(40, innerWidth / 2, innerHeight / 2); }
+    if (delWord === '') delOut.textContent = 'Hepsi silindi! 🫥';
+  }
+  document.getElementById('delBtn').addEventListener('click', () => { if (!delWord) return; delWord = delWord.slice(0, -1); light('delete', 300); if (delWord !== 'ELMA') sfx.key(); renderDel(); });
+  document.getElementById('delReset').addEventListener('click', () => { delWord = WORD; renderDel(); });
+  delOut.textContent = WORD + '|  ← fazladan A var!';
+
+  // Shift
+  const shiftBtn = document.getElementById('shiftBtn'), shiftOut = document.getElementById('shiftOut');
+  const shiftSet = (on) => {
+    shiftOut.innerHTML = on ? 'A &nbsp; ^ &nbsp; ( &nbsp; ;' : 'a &nbsp; 3 &nbsp; 8 &nbsp; ,';
+    shiftBtn.classList.toggle('down', on);
+    ['shiftL', 'shiftR'].forEach(id => keyEls[id].classList.toggle('pressed', on));
+    if (on) sfx.key();
+  };
+  ['pointerdown', 'keydown'].forEach(ev => shiftBtn.addEventListener(ev, e => { if (ev === 'keydown' && e.key !== ' ' && e.key !== 'Enter') return; shiftSet(true); }));
+  ['pointerup', 'pointerleave', 'pointercancel', 'keyup', 'blur'].forEach(ev => shiftBtn.addEventListener(ev, () => shiftSet(false)));
+
+  // Command: kopyala / yapıştır
+  const src = document.getElementById('fruitSrc'), dst = document.getElementById('fruitDst');
+  let selected = null, clipboard = null;
+  src.addEventListener('click', e => {
+    const f = e.target.closest('.fruit'); if (!f) return;
+    src.querySelectorAll('.fruit').forEach(x => x.classList.remove('sel'));
+    f.classList.add('sel'); selected = f.textContent; sfx.key();
+  });
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    light('cmdL', 300); light('lC', 300);
+    if (!selected) { say('🍎', 'Önce bir meyve seç!', 'Sepetteki meyvelerden birine tıkla, sonra ⌘ C ile kopyala.'); return; }
+    clipboard = selected; sfx.key();
+    say('📋', 'Kopyalandı!', `${clipboard} panoya kopyalandı. Şimdi ⌘ V ile yapıştır!`);
+  });
+  document.getElementById('pasteBtn').addEventListener('click', () => {
+    light('cmdL', 300); light('lV', 300);
+    if (!clipboard) { say('🤷', 'Pano boş!', 'Önce bir meyve seçip ⌘ C ile kopyalamalısın.'); return; }
+    const s = document.createElement('span'); s.className = 'fruit'; s.textContent = clipboard; s.style.animation = 'popEmoji .3s';
+    dst.appendChild(s); dst.classList.remove('empty'); sfx.good();
+    if (dst.children.length === 5) confetti(80, innerWidth / 2, innerHeight / 2);
+  });
+  document.getElementById('basketClear').addEventListener('click', () => { dst.innerHTML = ''; dst.classList.add('empty'); });
+
+  // Boşluk
+  const SENT = ['Ben', 'klavye', 'öğreniyorum'];
+  const spaceOut = document.getElementById('spaceOut'), spaceMsg = document.getElementById('spaceMsg');
+  let spaces = 0;
+  function renderSpace() {
+    spaceOut.innerHTML = SENT.map((w, i) => i < spaces ? w + '<span class="space-vis"></span>' : w).join('');
+    spaceMsg.textContent = spaces >= SENT.length - 1 ? 'Şimdi okunuyor: "Ben klavye öğreniyorum" 🎉' : (spaces === 0 ? 'Kelimeler yapışmış! Boşluk tuşuyla ayır.' : 'Devam et!');
+  }
+  document.getElementById('spaceBtn').addEventListener('click', () => {
+    light('space', 300);
+    if (spaces >= SENT.length - 1) return;
+    spaces++; sfx.key(); renderSpace();
+    if (spaces === SENT.length - 1) { sfx.good(); confetti(50, innerWidth / 2, innerHeight / 2); }
+  });
+  document.getElementById('spaceReset').addEventListener('click', () => { spaces = 0; renderSpace(); });
+  renderSpace();
+
+  // Enter
+  const chat = document.getElementById('chat'), chatInput = document.getElementById('chatInput');
+  function send() {
+    const v = chatInput.value.trim() || 'Merhaba! 👋';
+    const m = document.createElement('div'); m.className = 'msg'; m.textContent = v;
+    chat.appendChild(m); while (chat.children.length > 3) chat.firstChild.remove();
+    chatInput.value = ''; light('enter', 300); sfx.good();
+  }
+  document.getElementById('enterBtn').addEventListener('click', send);
+  chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); send(); } });
+})();
+</script>
+</body>
+</html>

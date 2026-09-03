@@ -25,10 +25,22 @@ Statik bir site olduğu için Netlify, Cloudflare Pages veya herhangi bir payla�
 | Yol | Açıklama |
 |---|---|
 | `index.html` | Uygulamanın tamamı — HTML, CSS, 3B sahne, QR kodlayıcı, GIF kodlayıcı. Çalışması için gereken tek dosya. |
+| `klavye/index.html` | **Mac Klavye Tuşları ve İşlevleri** — ilkokul öğrencileri için eğlenceli klavye rehberi (aşağıya bakın). Bağımsız tek dosya. |
 | `dev/qr.js` | QR kodlayıcının bağımsız kopyası (test için). |
 | `dev/qr-test.html` | QR kodlayıcıyı tarayıcının kendi QR okuyucusuna karşı doğrulayan test sayfası. |
 
 `dev/` klasörü çalışma zamanında kullanılmaz; silinebilir.
+
+## Klavye Okulu (`klavye/`)
+
+İlkokul öğrencileri için Mac klavyesini öğreten, tek dosyalık eğlenceli bir sayfa. Harici kütüphane yok; `klavye/index.html` dosyasına çift tıklamak yeterli. GitHub Pages'te `https://KULLANICI.github.io/DEPO/klavye/` adresinde açılır.
+
+- **Sihirli Klavye:** Türkçe Q düzeninde tıklanabilir Mac klavyesi. Tuşa tıklayınca konuşma balonunda çocuk diliyle açıklama çıkar; gerçek klavyede basılan tuş da ekranda ışıldar.
+- **Süper Tuşlar:** Caps Lock, Silme, Shift, Komut (⌘), Boşluk ve Enter için birer kart ve canlı "Dene!" deneyi (büyük harf kilidi, fazla harfi silme, meyve kopyala-yapıştır, yapışık kelimeleri ayırma, mesaj gönderme).
+- **Hangi Tuş? oyunu:** 10 soruluk mini oyun; doğru tuşta konfeti ve ses, iki yanlıştan sonra doğru tuş parlar, sonunda yıldızlı skor.
+- **Kısayol Köşesi:** ⌘C, ⌘V, ⌘Z, ⌘S, ⌘A, ⌘Q açıklamaları.
+
+Sesler Web Audio ile üretilir ve sağ üstteki düğmeyle kapatılabilir. Yazı tipi (Fredoka) Google Fonts'tan yüklenir; internet yoksa sistem yazı tipine düşer.
 
 ## QR kodlayıcı
 
