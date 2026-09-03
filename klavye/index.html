@@ -5,111 +5,155 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Mac Klavye Tuşları ve İşlevleri — Eğlenceli Klavye Okulu</title>
 <meta name="description" content="İlkokul öğrencileri için eğlenceli Mac klavye rehberi: tuşlara dokun, ne işe yaradıklarını öğren, deneyler yap ve Hangi Tuş? oyununu oyna!" />
-<meta name="theme-color" content="#f9c9a9" />
+<meta name="theme-color" content="#1e3f37" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Andika:wght@400;700&display=swap" rel="stylesheet" />
 <style>
+  /* ============ Tema: Sınıf kara tahtası ============ */
   :root {
-    --bg1: #fbd6bb;
-    --bg2: #f6b99b;
-    --card: #fff7ee;
-    --clay: #f3ead9;
-    --clay-dark: #c9b899;
-    --ink: #3a2c26;
-    --ink-soft: #7a5f52;
-    --green: #78d9b0;   --green-d: #3fae86;
-    --coral: #f7907d;   --coral-d: #d2604f;
-    --purple: #c8a8e8;  --purple-d: #9a74c6;
-    --yellow: #f4c04b;  --yellow-d: #cf9a20;
-    --blue: #4d6fd0;    --blue-d: #2f4ea3;
-    --magenta: #b64a86; --magenta-d: #8a2f62;
-    --key: #f6f1e7;     --key-d: #c8bfae;
-    --radius: 22px;
+    --board: #1e3f37;
+    --board-deep: #142c27;
+    --chalk: #f4efe2;
+    --chalk-dim: #c9cdbd;
+    --paper: #fff8e6;
+    --paper-line: #e8dcc0;
+    --ink: #2f2a24;
+    --ink-soft: #6d6154;
+    --wood: #8a5a2b;
+    --wood-hi: #c48a4f;
+    --yellow: #ffcb3d;  --yellow-d: #d9a516;
+    --red: #ff6b57;     --red-d: #d2473a;
+    --sky: #5ec4ec;     --sky-d: #2f95c0;
+    --green: #7ad38a;   --green-d: #3fa25a;
+    --purple: #b48de6;  --purple-d: #8a5fc4;
+    --pink: #ff8fc5;    --pink-d: #d85a97;
+    --blue: #3f6fd8;    --blue-d: #274ea6;
+    --magenta: #c4488f; --magenta-d: #96306a;
+    --coral: var(--red); --coral-d: var(--red-d);
+    --key: #f6f1e4;     --key-d: #c6bda9;
+    --radius: 18px;
+    --display: "Lilita One", "Arial Black", Impact, sans-serif;
+    --body: "Andika", "Verdana", "Trebuchet MS", sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html { scroll-behavior: smooth; }
   body {
-    font-family: "Fredoka", "Nunito", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
-    color: var(--ink);
-    background: linear-gradient(160deg, var(--bg1), var(--bg2) 60%, #f0a98a);
+    font-family: var(--body);
+    color: var(--chalk);
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(255,255,255,.07), transparent 45%),
+      radial-gradient(ellipse at 80% 90%, rgba(255,255,255,.05), transparent 45%),
+      radial-gradient(ellipse at 60% 40%, rgba(0,0,0,.18), transparent 60%),
+      linear-gradient(170deg, var(--board), var(--board-deep));
     background-attachment: fixed;
     min-height: 100vh;
-    line-height: 1.45;
+    line-height: 1.5;
     overflow-x: hidden;
   }
-  button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
-  main { width: min(1040px, 100% - 24px); margin: 0 auto; padding-bottom: 60px; }
-
-  /* ---------- Decor ---------- */
-  .blob { position: fixed; border-radius: 50%; filter: blur(2px); opacity: .55; z-index: -1; pointer-events: none; }
-  .blob.a { width: 260px; height: 260px; background: #c7b6f0; top: -80px; left: -90px; }
-  .blob.b { width: 180px; height: 180px; background: #ffe7a8; bottom: 10%; right: -60px; }
-  .blob.c { width: 120px; height: 120px; background: #a9e7cf; top: 40%; left: -40px; }
-
-  /* ---------- Header ---------- */
-  header { text-align: center; padding: 34px 0 10px; position: relative; }
-  .title {
-    display: inline-block;
-    font-weight: 700;
-    font-size: clamp(28px, 5.4vw, 54px);
-    letter-spacing: .5px;
-    background: var(--clay);
-    color: #5a4535;
-    padding: 12px 28px;
-    border-radius: 30px;
-    box-shadow: 0 8px 0 var(--clay-dark), 0 18px 30px rgba(120, 70, 40, .22);
-    transform: rotate(-1.5deg);
-    animation: pop .7s cubic-bezier(.2, 1.4, .4, 1) both;
+  /* Tebeşir tozu dokusu */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .13;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   }
-  .title span { display: inline-block; animation: wiggle 3s ease-in-out infinite; }
-  .subtitle { margin-top: 22px; font-size: clamp(16px, 2.4vw, 22px); color: #5a4535; font-weight: 500; }
-  .mascot { font-size: clamp(40px, 8vw, 70px); display: block; margin: 8px auto 0; animation: bounce 2.4s ease-in-out infinite; }
+  /* Ahşap çerçeve */
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: 40; pointer-events: none;
+    border: 12px solid transparent;
+    border-image: linear-gradient(90deg, var(--wood), var(--wood-hi) 30%, var(--wood) 55%, var(--wood-hi) 80%, var(--wood)) 1;
+    box-shadow: inset 0 0 0 2px #5d3a18, inset 0 0 40px rgba(0,0,0,.45);
+  }
+  button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+  main { width: min(1040px, 100% - 44px); margin: 0 auto; padding: 0 0 70px; }
+  b { font-weight: 700; }
+
+  /* ---------- Giriş animasyonları ---------- */
+  .reveal { animation: rise .7s cubic-bezier(.2, .9, .3, 1.2) both; animation-delay: var(--d, 0s); }
+  @keyframes rise { from { opacity: 0; transform: translateY(26px) rotate(-1deg); } to { opacity: 1; transform: none; } }
+
+  /* ---------- Başlık ---------- */
+  header { text-align: center; padding: 54px 0 12px; position: relative; }
+  .title {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(38px, 7.2vw, 78px); line-height: 1;
+    letter-spacing: 1px; color: var(--chalk);
+    text-shadow: 0 0 1px #fff, 2px 2px 0 rgba(0,0,0,.25), 0 0 18px rgba(255,255,255,.18);
+    position: relative; display: inline-block; max-width: 100%;
+  }
+  .title span { display: inline-block; animation: wiggle 3s ease-in-out infinite; transform-origin: 50% 80%; }
+  .title em {
+    font-style: normal; position: relative; white-space: nowrap;
+    color: var(--yellow);
+  }
+  /* Tebeşirle çizilmiş alt çizgi */
+  .title em::after {
+    content: ""; position: absolute; left: -2%; right: -2%; bottom: -.12em; height: .16em;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'><path d='M2 8 C 40 2, 80 12, 120 6 S 180 3, 198 7' fill='none' stroke='%23ff6b57' stroke-width='5' stroke-linecap='round'/></svg>") no-repeat center / 100% 100%;
+    transform-origin: left; animation: draw 1s .5s cubic-bezier(.2,.8,.3,1) both;
+  }
+  @keyframes draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  .subtitle { margin-top: 20px; font-size: clamp(16px, 2.3vw, 21px); color: var(--chalk-dim); }
+  .mascot { font-size: clamp(44px, 8vw, 72px); display: block; margin: 12px auto 0; animation: bounce 2.4s ease-in-out infinite; filter: drop-shadow(0 6px 0 rgba(0,0,0,.25)); }
   .topbar { display: flex; justify-content: center; gap: 8px; margin-top: 18px; }
   .chip {
-    background: var(--card); border-radius: 999px; padding: 8px 14px; font-weight: 600;
-    box-shadow: 0 4px 0 #dccbb5; transition: transform .1s;
+    border: 2px dashed var(--chalk-dim); color: var(--chalk); border-radius: 999px; padding: 8px 16px;
+    font-weight: 700; transition: transform .1s, background .2s;
   }
-  .chip:active { transform: translateY(3px); box-shadow: 0 1px 0 #dccbb5; }
+  .chip:hover { background: rgba(255,255,255,.08); }
+  .chip:active { transform: scale(.96); }
 
-  /* ---------- Sections ---------- */
-  section { margin-top: 46px; }
+  /* ---------- Bölümler ---------- */
+  section { margin-top: 56px; }
   h2 {
-    font-size: clamp(22px, 3.6vw, 34px); font-weight: 700; color: #5a4535;
-    display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+    font-family: var(--display); font-weight: 400; letter-spacing: .5px;
+    font-size: clamp(28px, 4.2vw, 42px); color: var(--chalk);
+    display: flex; align-items: center; gap: 14px; margin-bottom: 10px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,.25);
   }
   h2 .badge {
-    display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 14px;
-    background: var(--card); box-shadow: 0 5px 0 #dccbb5; font-size: 24px; transform: rotate(-6deg);
+    display: inline-grid; place-items: center; width: 50px; height: 50px; border-radius: 50%;
+    background: var(--yellow); box-shadow: 0 5px 0 var(--yellow-d); font-size: 26px; transform: rotate(-8deg);
+    text-shadow: none;
   }
-  .lead { color: var(--ink-soft); font-size: clamp(15px, 2vw, 18px); margin-bottom: 18px; }
+  section:nth-of-type(2) h2 .badge { background: var(--sky); box-shadow: 0 5px 0 var(--sky-d); }
+  section:nth-of-type(3) h2 .badge { background: var(--pink); box-shadow: 0 5px 0 var(--pink-d); }
+  .lead { color: var(--chalk-dim); font-size: clamp(15px, 2vw, 18px); margin-bottom: 20px; }
+  .lead b { color: var(--yellow); }
 
-  /* ---------- Mode switch ---------- */
-  .modes { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  /* ---------- Mod düğmeleri ---------- */
+  .modes { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
   .mode {
-    padding: 10px 20px; border-radius: 999px; font-weight: 700; font-size: 17px;
-    background: var(--card); box-shadow: 0 5px 0 #dccbb5; transition: transform .12s, background .2s;
+    font-family: var(--display); letter-spacing: .5px;
+    padding: 10px 22px; border-radius: 14px; font-size: 19px;
+    background: rgba(255,255,255,.08); border: 2px solid var(--chalk-dim); color: var(--chalk);
+    transition: transform .12s, background .2s; transform: rotate(-1deg);
   }
-  .mode[aria-pressed="true"] { background: var(--yellow); box-shadow: 0 5px 0 var(--yellow-d); }
+  .mode + .mode { transform: rotate(1deg); }
+  .mode[aria-pressed="true"] { background: var(--yellow); border-color: var(--yellow); color: var(--ink); box-shadow: 0 5px 0 var(--yellow-d); }
   .mode:active { transform: translateY(3px); }
 
-  /* ---------- Speech bubble ---------- */
+  /* ---------- Konuşma balonu (kağıt not) ---------- */
   .bubble {
-    position: relative; background: var(--card); border-radius: var(--radius);
-    padding: 18px 22px; min-height: 96px; display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center;
-    box-shadow: 0 8px 0 #dccbb5, 0 16px 30px rgba(120, 70, 40, .15);
-    margin-bottom: 26px; transition: transform .2s;
+    position: relative; background: var(--paper); color: var(--ink); border-radius: 8px;
+    padding: 20px 24px; min-height: 100px; display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center;
+    box-shadow: 0 14px 30px rgba(0,0,0,.35), 0 2px 0 rgba(255,255,255,.4) inset;
+    margin-bottom: 30px; transition: transform .2s; transform: rotate(-.6deg);
+    background-image: repeating-linear-gradient(transparent 0 27px, var(--paper-line) 27px 28px);
+  }
+  .bubble::before { /* bant */
+    content: ""; position: absolute; top: -14px; left: 50%; width: 120px; height: 28px; margin-left: -60px;
+    background: rgba(255, 221, 120, .75); transform: rotate(-3deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,.15); border-left: 2px dashed rgba(255,255,255,.6); border-right: 2px dashed rgba(255,255,255,.6);
   }
   .bubble::after {
-    content: ""; position: absolute; left: 60px; bottom: -22px;
-    border: 14px solid transparent; border-top-color: var(--card); border-bottom: 0;
+    content: ""; position: absolute; left: 64px; bottom: -20px;
+    border: 12px solid transparent; border-top-color: var(--paper); border-bottom: 0;
   }
-  .bubble .emoji { font-size: 52px; line-height: 1; animation: pop .4s cubic-bezier(.2, 1.4, .4, 1) both; }
-  .bubble h3 { font-size: clamp(19px, 2.6vw, 26px); font-weight: 700; margin-bottom: 4px; }
+  .bubble .emoji { font-size: 54px; line-height: 1; animation: popEmoji .4s cubic-bezier(.2, 1.4, .4, 1) both; }
+  .bubble h3 { font-family: var(--display); font-weight: 400; font-size: clamp(22px, 3vw, 30px); margin-bottom: 4px; color: #b33a2c; }
   .bubble p { color: var(--ink-soft); font-size: clamp(15px, 2vw, 18px); }
   .bubble.flash { animation: flash .5s; }
-  .stars { font-size: 22px; letter-spacing: 2px; }
 
-  /* ---------- Keyboard ---------- */
+  /* ---------- Klavye ---------- */
   .kb-wrap { position: relative; }
   .keyboard {
     --u: clamp(30px, 5.1vw, 52px);
@@ -118,9 +162,9 @@
     grid-auto-rows: var(--u);
     gap: clamp(3px, .6vw, 7px);
     padding: clamp(8px, 1.6vw, 18px);
-    background: linear-gradient(#e8e2d6, #d7cfc1);
+    background: linear-gradient(#e2dccd, #cfc7b5);
     border-radius: clamp(14px, 2.5vw, 26px);
-    box-shadow: 0 12px 0 #b9ae9a, 0 26px 40px rgba(90, 60, 40, .28);
+    box-shadow: 0 12px 0 #a99e88, 0 30px 50px rgba(0,0,0,.45);
     user-select: none;
   }
   .key {
@@ -129,10 +173,12 @@
     border-radius: clamp(6px, 1vw, 11px);
     background: var(--key);
     box-shadow: 0 4px 0 var(--key-d), inset 0 -2px 0 rgba(0,0,0,.05);
-    font-size: clamp(9px, 1.45vw, 16px); font-weight: 600; color: #4a3d36;
+    font-size: clamp(9px, 1.45vw, 16px); font-weight: 700; color: #3b332c;
     transition: transform .08s, box-shadow .08s, background .2s;
     touch-action: manipulation;
+    animation: keyIn .5s cubic-bezier(.2, 1.2, .3, 1) both; animation-delay: calc(.35s + var(--i, 0) * 12ms);
   }
+  @keyframes keyIn { from { opacity: 0; transform: translateY(-14px) scale(.8); } to { opacity: 1; transform: none; } }
   .key .top { font-size: .75em; line-height: 1; color: #7a6a60; }
   .key .main { line-height: 1.1; }
   .key.fnrow { font-size: clamp(8px, 1.1vw, 12px); }
@@ -153,49 +199,60 @@
   .key.yellow.pressed, .key.yellow:active   { box-shadow: 0 1px 0 var(--yellow-d); }
   .key.blue.pressed, .key.blue:active       { box-shadow: 0 1px 0 var(--blue-d); }
   .key.magenta.pressed, .key.magenta:active { box-shadow: 0 1px 0 var(--magenta-d); }
-  .key.correct { animation: correct .7s; outline: 4px solid #3fae86; outline-offset: 2px; }
-  .key.wrong { animation: shake .45s; outline: 4px solid #d2604f; outline-offset: 2px; }
+  .key.correct { animation: correct .7s; outline: 4px solid var(--green); outline-offset: 2px; }
+  .key.wrong { animation: shake .45s; outline: 4px solid var(--red); outline-offset: 2px; }
   .key.hint { animation: glow 1s infinite alternate; }
-  .kb-hint { text-align: center; color: #6a4f42; margin-top: 14px; font-weight: 500; }
-  .kb-hint kbd {
-    font: inherit; background: var(--card); padding: 2px 10px; border-radius: 8px; box-shadow: 0 3px 0 #dccbb5;
-  }
+  .kb-hint { text-align: center; color: var(--chalk-dim); margin-top: 16px; }
+  .kb-hint kbd { font: inherit; font-weight: 700; color: var(--ink); background: var(--key); padding: 2px 10px; border-radius: 8px; box-shadow: 0 3px 0 var(--key-d); }
 
-  /* ---------- Quiz ---------- */
+  /* ---------- Oyun çubuğu ---------- */
   .quiz-bar {
     display: none; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between;
-    background: var(--card); border-radius: 18px; padding: 12px 18px; margin-bottom: 14px;
-    box-shadow: 0 6px 0 #dccbb5;
+    border: 2px dashed var(--chalk-dim); border-radius: 14px; padding: 12px 18px; margin-bottom: 18px;
   }
   .quiz-bar.on { display: flex; }
-  .progress { flex: 1 1 160px; height: 16px; background: #eadfce; border-radius: 999px; overflow: hidden; }
-  .progress > div { height: 100%; width: 0; background: linear-gradient(90deg, #78d9b0, #f4c04b); transition: width .4s; border-radius: 999px; }
-  .score { font-weight: 700; font-size: 18px; }
+  .progress { flex: 1 1 160px; height: 16px; background: rgba(255,255,255,.12); border-radius: 999px; overflow: hidden; }
+  .progress > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--green), var(--yellow)); transition: width .4s; border-radius: 999px; }
+  .score { font-family: var(--display); font-size: 20px; letter-spacing: .5px; }
 
-  /* ---------- Cards ---------- */
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 20px; }
+  /* ---------- Kartlar (tahtaya bantlanmış kağıtlar) ---------- */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 26px 22px; padding-top: 14px; }
   .card {
-    background: var(--card); border-radius: var(--radius); padding: 20px;
-    box-shadow: 0 8px 0 #dccbb5, 0 16px 30px rgba(120, 70, 40, .12);
+    position: relative; background: var(--paper); color: var(--ink); border-radius: 6px; padding: 22px 20px 20px;
+    box-shadow: 0 16px 30px rgba(0,0,0,.35);
     display: flex; flex-direction: column; gap: 12px;
-    transition: transform .2s;
+    transition: transform .25s;
+    background-image: repeating-linear-gradient(transparent 0 27px, var(--paper-line) 27px 28px);
+    background-position: 0 14px;
   }
-  .card:hover { transform: translateY(-4px) rotate(-.4deg); }
+  .card:nth-child(odd) { transform: rotate(-1.1deg); }
+  .card:nth-child(even) { transform: rotate(.9deg); }
+  .card:hover { transform: rotate(0) translateY(-6px) scale(1.02); z-index: 2; }
+  .card::before { /* bant */
+    content: ""; position: absolute; top: -13px; left: 50%; width: 110px; height: 26px; margin-left: -55px;
+    background: rgba(255, 221, 120, .78); transform: rotate(-2deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,.15); border-left: 2px dashed rgba(255,255,255,.6); border-right: 2px dashed rgba(255,255,255,.6);
+  }
+  .card:nth-child(2)::before { background: rgba(94,196,236,.7); transform: rotate(3deg); }
+  .card:nth-child(3)::before { background: rgba(255,143,197,.7); }
+  .card:nth-child(4)::before { background: rgba(122,211,138,.7); transform: rotate(-4deg); }
+  .card:nth-child(5)::before { background: rgba(180,141,230,.7); transform: rotate(2deg); }
+  .card:nth-child(6)::before { background: rgba(255,107,87,.65); }
   .card .head { display: flex; align-items: center; gap: 12px; }
   .card .kicon {
-    width: 58px; height: 58px; border-radius: 16px; display: grid; place-items: center;
-    font-size: 26px; font-weight: 700; flex: none;
+    width: 60px; height: 60px; border-radius: 14px; display: grid; place-items: center;
+    font-size: 28px; font-weight: 700; flex: none; box-shadow: 0 4px 0 rgba(0,0,0,.18); transform: rotate(-6deg);
   }
-  .card h3 { font-size: 21px; font-weight: 700; }
-  .card .what { color: var(--ink-soft); font-size: 16px; }
+  .card h3 { font-family: var(--display); font-weight: 400; font-size: 24px; letter-spacing: .3px; }
+  .card .what { color: var(--ink-soft); font-size: 15px; }
   .card .demo {
-    background: #fff; border-radius: 16px; padding: 12px; border: 3px dashed #eadfce;
+    background: #fff; border-radius: 12px; padding: 12px; border: 3px dashed #d9c9a3;
     display: flex; flex-direction: column; gap: 10px; margin-top: auto;
   }
-  .demo .label { font-weight: 700; font-size: 14px; color: #a0806f; text-transform: uppercase; letter-spacing: 1px; }
+  .demo .label { font-family: var(--display); font-size: 14px; color: #b33a2c; letter-spacing: 1.2px; text-transform: uppercase; }
   .demo .out {
     min-height: 44px; overflow-wrap: anywhere; display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
-    font-size: 22px; font-weight: 600; word-break: break-word;
+    font-size: 22px; font-weight: 700; word-break: break-word;
   }
   .demo .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .btn {
@@ -223,67 +280,71 @@
   .toggle[aria-pressed="true"] .sw::after { left: 27px; }
   .space-vis { display: inline-block; min-width: 14px; height: 26px; border-bottom: 4px solid var(--magenta); margin: 0 2px; }
   .chat { display: flex; flex-direction: column; gap: 6px; min-height: 40px; }
-  .chat .msg { align-self: flex-end; background: var(--yellow); padding: 6px 12px; border-radius: 14px 14px 4px 14px; font-weight: 600; animation: pop .3s cubic-bezier(.2,1.4,.4,1) both; }
-  .basket { display: flex; gap: 6px; min-height: 44px; align-items: center; background: #fff8e6; border-radius: 12px; padding: 6px 10px; font-size: 26px; flex-wrap: wrap; }
+  .chat .msg { align-self: flex-end; background: var(--yellow); padding: 6px 12px; border-radius: 14px 14px 4px 14px; font-weight: 700; animation: popEmoji .3s cubic-bezier(.2,1.4,.4,1) both; }
+  .basket { display: flex; gap: 6px; min-height: 44px; align-items: center; background: #fff3d6; border-radius: 12px; padding: 6px 10px; font-size: 26px; flex-wrap: wrap; }
   .basket.empty::before { content: "boş sepet"; font-size: 14px; color: #b9a48f; }
   .fruit { cursor: pointer; transition: transform .15s; }
-  .fruit.sel { transform: scale(1.3); filter: drop-shadow(0 0 6px #f4c04b); }
+  .fruit.sel { transform: scale(1.3); filter: drop-shadow(0 0 6px var(--yellow)); }
   input.type {
-    font: inherit; font-size: 20px; padding: 8px 12px; border-radius: 12px; border: 3px solid #eadfce; width: 100%;
+    font: inherit; font-size: 20px; padding: 8px 12px; border-radius: 12px; border: 3px solid #d9c9a3; width: 100%;
     background: #fff; color: var(--ink);
   }
-  input.type:focus { outline: none; border-color: var(--green-d); }
+  input.type:focus { outline: none; border-color: var(--sky-d); }
 
-  /* ---------- Shortcuts ---------- */
-  .shortcuts { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
-  .sc { background: var(--card); border-radius: 18px; padding: 16px; box-shadow: 0 6px 0 #dccbb5; display: flex; gap: 12px; align-items: center; }
+  /* ---------- Kısayollar (tebeşir kutuları) ---------- */
+  .shortcuts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .sc {
+    border: 2px solid var(--chalk-dim); border-radius: 14px; padding: 16px; display: flex; gap: 14px; align-items: center;
+    background: rgba(255,255,255,.04); transition: background .2s, transform .2s;
+  }
+  .sc:hover { background: rgba(255,255,255,.1); transform: translateY(-3px); }
   .sc .combo { display: flex; gap: 4px; align-items: center; font-weight: 700; flex: none; }
   .sc kbd { font: inherit; font-weight: 700; background: var(--blue); color: #fff; padding: 6px 10px; border-radius: 9px; box-shadow: 0 3px 0 var(--blue-d); }
   .sc kbd.l { background: var(--key); color: var(--ink); box-shadow: 0 3px 0 var(--key-d); }
-  .sc p { font-size: 15px; color: var(--ink-soft); }
-  .sc b { color: var(--ink); }
+  .sc p { font-size: 15px; color: var(--chalk-dim); }
+  .sc b { color: var(--yellow); }
 
-  footer { text-align: center; margin-top: 50px; color: #6a4f42; font-weight: 500; }
+  footer { text-align: center; margin-top: 60px; color: var(--chalk-dim); font-family: var(--display); font-size: 22px; letter-spacing: .5px; }
 
-  /* ---------- Confetti ---------- */
+  /* ---------- Konfeti ---------- */
   #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
 
-  /* ---------- Animations ---------- */
-  @keyframes pop { from { transform: scale(.6) rotate(-6deg); opacity: 0; } to { transform: scale(1) rotate(-1.5deg); opacity: 1; } }
-  .bubble .emoji { animation-name: popEmoji; }
+  /* ---------- Animasyonlar ---------- */
   @keyframes popEmoji { from { transform: scale(.4); } 60% { transform: scale(1.25); } to { transform: scale(1); } }
-  @keyframes wiggle { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(6deg); } }
+  @keyframes wiggle { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(8deg); } }
   @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-  @keyframes flash { 0% { transform: scale(1); } 40% { transform: scale(1.03); } 100% { transform: scale(1); } }
+  @keyframes flash { 0% { transform: rotate(-.6deg) scale(1); } 40% { transform: rotate(.4deg) scale(1.03); } 100% { transform: rotate(-.6deg) scale(1); } }
   @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
   @keyframes correct { 0% { transform: scale(1); } 40% { transform: scale(1.18) rotate(-4deg); } 100% { transform: scale(1); } }
   @keyframes glow { from { filter: brightness(1); } to { filter: brightness(1.25) drop-shadow(0 0 8px #fff3b0); } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
   @media (max-width: 560px) {
+    main { width: min(1040px, 100% - 34px); }
+    body::after { border-width: 8px; }
     .key.tiny .main { display: none; }
     .key.tiny .top { font-size: 1.25em; color: inherit; }
     .bubble { grid-template-columns: 1fr; text-align: center; }
-    .bubble::after { left: 50%; margin-left: -14px; }
+    .bubble::after { left: 50%; margin-left: -12px; }
+    .card:nth-child(odd), .card:nth-child(even) { transform: none; }
   }
 </style>
 </head>
 <body>
-<div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
 <canvas id="confetti"></canvas>
 
 <main>
   <header>
-    <h1 class="title">Mac Klavye <span>⌨️</span> Tuşları ve İşlevleri</h1>
-    <span class="mascot" aria-hidden="true">🐱</span>
-    <p class="subtitle">Tuşlara dokun, ne işe yaradıklarını öğren, sonra oyunla kendini dene! 🎈</p>
-    <div class="topbar">
+    <h1 class="title reveal">Mac Klavye <span>⌨️</span><br>Tuşları ve <em>İşlevleri</em></h1>
+    <span class="mascot reveal" style="--d:.15s" aria-hidden="true">🐱</span>
+    <p class="subtitle reveal" style="--d:.25s">Tuşlara dokun, ne işe yaradıklarını öğren, sonra oyunla kendini dene! 🎈</p>
+    <div class="topbar reveal" style="--d:.35s">
       <button class="chip" id="soundBtn" aria-pressed="true">🔊 Ses açık</button>
     </div>
   </header>
 
   <!-- ===================== KEYBOARD ===================== -->
-  <section id="klavye">
+  <section id="klavye" class="reveal" style="--d:.3s">
     <h2><span class="badge">👆</span> Sihirli Klavye</h2>
     <p class="lead">Ekrandaki tuşlara tıkla ya da <b>kendi klavyende</b> bir tuşa bas. Renkli tuşlar en önemlileri!</p>
 
@@ -314,7 +375,7 @@
   </section>
 
   <!-- ===================== SUPER KEYS ===================== -->
-  <section id="super">
+  <section id="super" class="reveal" style="--d:.5s">
     <h2><span class="badge">🦸</span> Süper Tuşlar</h2>
     <p class="lead">Bu altı tuş klavyenin kahramanları. Her birini hemen burada deneyebilirsin!</p>
 
@@ -424,7 +485,7 @@
   </section>
 
   <!-- ===================== SHORTCUTS ===================== -->
-  <section id="kisayol">
+  <section id="kisayol" class="reveal" style="--d:.6s">
     <h2><span class="badge">⚡</span> Kısayol Köşesi</h2>
     <p class="lead">⌘ Komut tuşunu basılı tutup bir harfe basarsan sihir olur!</p>
     <div class="shortcuts">
@@ -597,6 +658,7 @@
     el.type = 'button';
     el.className = 'key ' + (k.cls || '');
     el.style.gridColumn = 'span ' + k.w;
+    el.style.setProperty('--i', ALL.length);
     el.style.gridRow = k.rows ? `${r + 1} / span ${k.rows}` : String(r + 1);
     el.dataset.id = k.id;
     const info = infoFor(k);
